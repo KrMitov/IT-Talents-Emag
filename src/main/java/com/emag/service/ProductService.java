@@ -22,7 +22,7 @@ public class ProductService {
             throw new NotFoundException("Product not found");
         }
         Product foundProduct = product.get();
-        if (foundProduct.getDeleted_at() != null){
+        if (foundProduct.getDeletedAt() != null){
             throw new BadRequestException("The product is not available!");
         }
         ProductDTO productDTO = new ProductDTO(foundProduct);

@@ -1,11 +1,12 @@
 package com.emag.controller;
 
+import com.emag.model.dto.RequestCategoryDTO;
+import com.emag.model.dto.CategoryAndSubcategoriesDTO;
+import com.emag.model.dto.CategoryDTO;
 import com.emag.model.dto.ProductDTO;
 import com.emag.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,4 +21,26 @@ public class CategoryController extends AbstractController{
         return categoryService.getProductsFroCategory(id);
     }
 
+    @PostMapping("/category")
+    public CategoryDTO addCategory(@RequestBody RequestCategoryDTO requestCategoryDTO){
+        //check the session if the logged user is admin
+        return categoryService.addCategory(requestCategoryDTO);
+    }
+
+    @PutMapping("/category/{id}")
+    public CategoryDTO editCategory(@PathVariable int id, @RequestBody RequestCategoryDTO requestCategoryDTO){
+        //check the session if the logged user is admin
+        return categoryService.editCategory(id, requestCategoryDTO);
+    }
+
+    @DeleteMapping("/category/{id}")
+    public CategoryAndSubcategoriesDTO deleteCategory(@PathVariable int id){
+        //check the session if the logged user is admin
+        return categoryService.deleteCategory(id);
+    }
+
+    @GetMapping("/category")
+    public List<CategoryAndSubcategoriesDTO> getAllCategories(){
+        return categoryService.getAllCategories();
+    }
 }

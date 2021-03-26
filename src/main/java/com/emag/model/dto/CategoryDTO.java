@@ -12,6 +12,7 @@ import lombok.Setter;
 @Setter
 public class CategoryDTO {
 
+    private int id;
     private String name;
     private CategoryDTO parentCategory;
 
@@ -19,12 +20,9 @@ public class CategoryDTO {
         if (category == null){
             return;
         }
+        this.id = category.getId();
         this.name = category.getName();
-        if (category.getParentCategory() == null){
-            this.parentCategory = null;
-        }
-        else {
-            this.parentCategory = new CategoryDTO(category.getParentCategory());
-        }
+        Category pCategory = category.getParentCategory();
+        this.parentCategory = pCategory == null ? null : new CategoryDTO(pCategory);
     }
 }

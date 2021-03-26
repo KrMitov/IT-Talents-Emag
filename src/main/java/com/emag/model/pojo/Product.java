@@ -19,15 +19,15 @@ public class Product {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private String full_name;
+    private String fullName;
     private String brand;
     private String model;
-    private double regular_price;
-    private Double discounted_price;
+    private double regularPrice;
+    private Double discountedPrice;
     private String description;
     private Integer quantity;
-    private int warranty_years;
-    private LocalDateTime deleted_at;
+    private int warrantyYears;
+    private LocalDateTime deletedAt;
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;

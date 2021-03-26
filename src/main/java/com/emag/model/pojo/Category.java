@@ -6,7 +6,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,4 +29,14 @@ public class Category {
     private List<Category> subCategories;
     @OneToMany(mappedBy = "category")
     private List<Product> products;
+
+    public List<Product> getProducts() {
+        List<Product> availableProducts = new ArrayList<>();
+        this.products.forEach(product -> {
+            if (product.getDeletedAt() == null){
+                availableProducts.add(product);
+            }
+        });
+        return availableProducts;
+    }
 }
