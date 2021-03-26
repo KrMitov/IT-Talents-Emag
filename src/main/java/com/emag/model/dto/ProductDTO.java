@@ -21,6 +21,7 @@ public class ProductDTO {
     private Integer quantity;
     private int warranty_years;
     private CategoryDTO category;
+    //private List<Review> reviews;
 
     public ProductDTO(Product product) {
         this.full_name = product.getFull_name();
@@ -32,5 +33,6 @@ public class ProductDTO {
         this.quantity = product.getQuantity();
         this.warranty_years = product.getWarranty_years();
         this.category = new CategoryDTO(product.getCategory());
+        //this.reviews = new ArrayList<>();
     }
 }

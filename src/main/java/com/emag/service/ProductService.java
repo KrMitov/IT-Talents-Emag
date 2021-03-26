@@ -1,9 +1,10 @@
 package com.emag.service;
 
+import com.emag.exceptions.BadRequestException;
+import com.emag.exceptions.NotFoundException;
 import com.emag.model.dto.ProductDTO;
 import com.emag.model.pojo.Product;
 import com.emag.model.repository.ProductRepository;
-import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +21,12 @@ public class ProductService {
         if (product.isEmpty()){
             throw new NotFoundException("Product not found");
         }
-        return new ProductDTO(product.get());
+        Product foundProduct = product.get();
+        if (foundProduct.getDeleted_at() != null){
+            throw new BadRequestException("The product is not available!");
+        }
+        ProductDTO productDTO = new ProductDTO(foundProduct);
+//        productDTO.setReviews(reviewService.getReviewsForProduct());
+        return productDTO;
     }
 }

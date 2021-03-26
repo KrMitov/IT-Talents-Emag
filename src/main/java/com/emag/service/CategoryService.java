@@ -1,9 +1,11 @@
 package com.emag.service;
 
+import com.emag.exceptions.BadRequestException;
+import com.emag.exceptions.NotFoundException;
 import com.emag.model.dto.ProductDTO;
 import com.emag.model.pojo.Category;
+import com.emag.model.pojo.Product;
 import com.emag.model.repository.CategoryRepository;
-import javassist.NotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +24,12 @@ public class CategoryService {
         if (category.isEmpty()){
             throw new NotFoundException("Category not found");
         }
+        List<Product> productsForCategory = category.get().getProducts();
+        if (productsForCategory.size() == 0){
+            throw new BadRequestException("No products for category");
+        }
         List<ProductDTO> productsDTOList = new ArrayList<>();
-        category.get().getProducts().forEach(product -> productsDTOList.add(new ProductDTO(product)));
+        productsForCategory.forEach(product -> productsDTOList.add(new ProductDTO(product)));
         return productsDTOList;
     }
 }
