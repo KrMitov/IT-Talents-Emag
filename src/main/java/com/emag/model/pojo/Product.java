@@ -1,5 +1,6 @@
 package com.emag.model.pojo;
 
+import com.emag.model.dto.RequestProductDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -26,9 +27,20 @@ public class Product {
     private Double discountedPrice;
     private String description;
     private Integer quantity;
-    private int warrantyYears;
+    private Integer warrantyYears;
     private LocalDateTime deletedAt;
     @ManyToOne
     @JoinColumn(name = "category_id")
     private Category category;
+
+    public Product(RequestProductDTO requestProductDTO) {
+        this.fullName = requestProductDTO.getFullName();
+        this.brand = requestProductDTO.getBrand();
+        this.model = requestProductDTO.getModel();
+        this.regularPrice = requestProductDTO.getRegularPrice();
+        this.discountedPrice = requestProductDTO.getDiscountedPrice();
+        this.description = requestProductDTO.getDescription();
+        this.quantity = requestProductDTO.getQuantity();
+        this.warrantyYears = requestProductDTO.getWarrantyYears();
+    }
 }

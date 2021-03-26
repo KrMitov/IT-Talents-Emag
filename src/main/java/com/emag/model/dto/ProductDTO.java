@@ -12,6 +12,7 @@ import lombok.Setter;
 @Setter
 public class ProductDTO {
 
+    private int id;
     private String fullName;
     private String brand;
     private String model;
@@ -19,11 +20,12 @@ public class ProductDTO {
     private Double discountedPrice;
     private String description;
     private Integer quantity;
-    private int warrantyYears;
+    private Integer warrantyYears;
     private CategoryDTO category;
     //private List<Review> reviews;
 
     public ProductDTO(Product product) {
+        this.id = product.getId();
         this.fullName = product.getFullName();
         this.brand = product.getBrand();
         this.model = product.getModel();

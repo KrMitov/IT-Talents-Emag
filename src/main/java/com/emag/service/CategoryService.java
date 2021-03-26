@@ -59,6 +59,7 @@ public class CategoryService {
     }
 
     public CategoryDTO addCategory(RequestCategoryDTO requestCategoryDTO) {
+        requestCategoryDTO.setName(requestCategoryDTO.getName().trim());
         validateCategoryInputData(requestCategoryDTO);
         Category category = new Category();
         category.setName(requestCategoryDTO.getName());
@@ -68,6 +69,7 @@ public class CategoryService {
 
     public CategoryDTO editCategory(int id, RequestCategoryDTO requestCategoryDTO) {
         Category editedCategory = getCategoryIfExists(id);
+        requestCategoryDTO.setName(requestCategoryDTO.getName().trim());
         validateCategoryInputData(requestCategoryDTO);
         editedCategory.setName(requestCategoryDTO.getName());
         editedCategory.setParentCategory(categoryRepository.findById(requestCategoryDTO.getParentCategoryId()).orElse(null));
