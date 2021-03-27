@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -36,11 +37,12 @@ import java.util.Set;
                 inverseJoinColumns = {@JoinColumn(name="address_id")}
         )
         private List<Address> addresses;
-        private String phone;
+        private String phoneNumber;
         @ManyToOne
         @JsonBackReference
         @JoinColumn(name="role_id")
         private Role role;
+        private Timestamp birthDate;
         private Timestamp createdAt;
         private String profile_picture;
 

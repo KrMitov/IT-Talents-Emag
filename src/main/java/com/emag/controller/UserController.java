@@ -1,9 +1,6 @@
 package com.emag.controller;
 
-import com.emag.model.dto.LoginRequestUserDTO;
-import com.emag.model.dto.RegisterRequestUserDTO;
-import com.emag.model.dto.RegisterResponseUserDTO;
-import com.emag.model.dto.UserWithoutPasswordDTO;
+import com.emag.model.dto.*;
 import com.emag.model.pojo.User;
 import com.emag.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.naming.AuthenticationException;
 import javax.servlet.http.HttpSession;
+import java.text.ParseException;
 
 @RestController
 public class UserController extends AbstractController{
@@ -44,7 +42,11 @@ public class UserController extends AbstractController{
         return "you logged out";
     }
 
-
+    @PutMapping("/users/{id}")
+    public UserWithoutPasswordDTO editUser(@PathVariable int id, @RequestBody EditProfileRequestDTO dto,HttpSession session) throws ParseException {
+          sessionManager.getLoggedUser(session);
+          return userService.editUser(id,dto);
+    }
 
 
 }

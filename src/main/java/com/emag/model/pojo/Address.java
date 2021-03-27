@@ -1,5 +1,6 @@
 package com.emag.model.pojo;
 
+import com.emag.model.dto.AddressDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -21,8 +22,18 @@ import java.util.List;
         private String city;
         private String neighborhood;
         private String street;
+        private String number;
         @ManyToMany(mappedBy = "addresses")
         private List<User> users;
+
+        public Address(AddressDTO address) {
+            this.country = address.getCountry();
+            this.province = address.getProvince();
+            this.city = address.getCity();
+            this.neighborhood = address.getNeighborhood();
+            this.street = address.getStreet();
+            this.number = address.getStreetNumber();
+        }
     }
 
 

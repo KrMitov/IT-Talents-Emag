@@ -8,7 +8,10 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
 
+import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 
 @Getter
@@ -21,8 +24,9 @@ public class UserWithoutPasswordDTO {
     private String email;
     private String name;
     private List<Address> addresses;
-    private String phone;
+    private String phoneNumber;
     private RoleWithoutUsersDTO role;
+    private Timestamp birthdate;
     private Timestamp createdAt;
     private String profile_picture;
 
@@ -32,8 +36,11 @@ public class UserWithoutPasswordDTO {
         this.email = user.getEmail();
         this.name = user.getName();
         this.addresses = user.getAddresses();
-        this.phone = user.getPhone();
+        this.phoneNumber = user.getPhoneNumber();
         this.role = new RoleWithoutUsersDTO(user.getRole());
+        if(user.getBirthDate()!=null) {
+            this.birthdate = user.getBirthDate();
+        }
         this.createdAt = user.getCreatedAt();
         this.profile_picture = user.getProfile_picture();
     }

@@ -2,19 +2,28 @@ package com.emag.service;
 
 import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
-import com.emag.model.dto.LoginRequestUserDTO;
-import com.emag.model.dto.RegisterRequestUserDTO;
-import com.emag.model.dto.RegisterResponseUserDTO;
-import com.emag.model.dto.UserWithoutPasswordDTO;
+import com.emag.model.dto.*;
+import com.emag.model.pojo.Address;
 import com.emag.model.pojo.Role;
 import com.emag.model.pojo.User;
+import com.emag.model.repository.AddressRepository;
 import com.emag.model.repository.RoleRepository;
 import com.emag.model.repository.UserRepository;
+import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -24,6 +33,8 @@ public class UserService {
     UserRepository userRepository;
     @Autowired
     RoleRepository roleRepository;
+    @Autowired
+    AddressRepository addressRepository;
 
   public RegisterResponseUserDTO register(RegisterRequestUserDTO dto){
       String email = dto.getEmail();
@@ -76,5 +87,69 @@ public class UserService {
       return dto;
   }
 
+  public UserWithoutPasswordDTO editUser(int id, EditProfileRequestDTO dto) {
+      Optional<User> userFromDb = userRepository.findById(id);
+      if(userFromDb.isEmpty()){
+          throw new NotFoundException("user not found");
+      }else{
+          User user = userFromDb.get();
+          if(dto.getOldPassword().length()>5){
+              String password = dto.getOldPassword();
+              PasswordEncoder encoder = new BCryptPasswordEncoder();
+              if(encoder.matches(password,user.getPassword())){
+                  String newPassword = dto.getNewPassword();
+                  String confirmNewPassword = dto.getConfirmNewPassword();
+                  if(newPassword.equals(confirmNewPassword)){
+                      user.setPassword(encoder.encode(newPassword));
+                      user = userRepository.save(user);
+                  }else{
+                      throw new BadRequestException("new passwords do not match");
+                  }
+              }else{
+                  throw new BadRequestException("wrong password");
+              }
+          }
+          if(dto.getPhoneNumber().length()>0){
+              if(dto.getPhoneNumber().length()==10) {
+                  String phoneNumber = dto.getPhoneNumber();
+                  user.setPhoneNumber(phoneNumber);
+                  user = userRepository.save(user);
+              }else{
+                  throw new BadRequestException("wrong phone number");
+              }
+          }
+          if(dto.getBirthDate().length()==10){
+              String dtoDate = dto.getBirthDate();
+//              DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd");
+//              LocalDate date = LocalDate.parse(dtoDate,formatter);
+              user.setBirthDate(Timestamp.valueOf(dtoDate));
+              user = userRepository.save(user);
+          }
+
+         if(dto.getAddress()!=null){
+             Address address = new Address(dto.getAddress());
+             if(containsAddress(address,user)){
+                 throw new BadRequestException("Address is already added");
+             }else{
+                 address = addressRepository.save(address);
+                 user.getAddresses().add(address);
+                 user = userRepository.save(user);
+             }
+         }
+
+         return  new UserWithoutPasswordDTO(user);
+      }
+  }
+
+  private boolean containsAddress(Address address,User user){
+      boolean result = false;
+      List<Address> addresses = user.getAddresses();
+      for (Address saved : addresses) {
+          if(saved.getCity().equals(address.getCity()) && saved.getStreet().equals(address.getStreet())){
+             result = true;
+          }
+      }
+      return result;
+  }
 
 }
