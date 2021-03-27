@@ -1,4 +1,53 @@
 package com.emag.model.pojo;
 
-public class User {
+import com.emag.model.dto.RegisterRequestUserDTO;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import javax.persistence.*;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Set;
+
+
+@Getter
+    @Setter
+    @NoArgsConstructor
+    @Entity
+    @Table(name = "users")
+    public class User {
+        @Id
+        @GeneratedValue(strategy = GenerationType.IDENTITY)
+        private int id;
+        private String nickname;
+        private String email;
+        private String password;
+        private String name;
+        //    @OneToMany(mappedBy = "user")
+//    @JsonManagedReference
+        @ManyToMany
+        @JoinTable(
+                name="saved_addresses",
+                joinColumns = {@JoinColumn(name="user_id")},
+                inverseJoinColumns = {@JoinColumn(name="address_id")}
+        )
+        private List<Address> addresses;
+        private String phone;
+        @ManyToOne
+        @JsonBackReference
+        @JoinColumn(name="role_id")
+        private Role role;
+        private Timestamp createdAt;
+        private String profile_picture;
+
+        public User(RegisterRequestUserDTO registerRequestUserDTO){
+            this.email = registerRequestUserDTO.getEmail();
+            this.password = registerRequestUserDTO.getPassword();
+            this.name = registerRequestUserDTO.getName();
+            this.createdAt = Timestamp.valueOf(LocalDateTime.now());
+        }
 }
