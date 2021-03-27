@@ -1,5 +1,6 @@
 package com.emag.controller;
 
+import com.emag.exceptions.AuthenticationException;
 import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
 import com.emag.model.dto.ErrorDTO;
@@ -27,6 +28,16 @@ public abstract class AbstractController {
         return new ErrorDTO(
                 e.getMessage(),
                 HttpStatus.BAD_REQUEST.value(),
+                LocalDateTime.now(),
+                e.getClass().getName());
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    @ResponseStatus(HttpStatus.UNAUTHORIZED)
+    public ErrorDTO handleAuthenticationException(AuthenticationException e){
+        return new ErrorDTO(
+                e.getMessage(),
+                HttpStatus.UNAUTHORIZED.value(),
                 LocalDateTime.now(),
                 e.getClass().getName());
     }

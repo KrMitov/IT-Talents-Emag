@@ -19,7 +19,6 @@ public class UserWithoutPasswordDTO {
     private int id;
     private String nickname;
     private String email;
-    private String password;
     private String name;
     private List<Address> addresses;
     private String phone;
@@ -31,7 +30,6 @@ public class UserWithoutPasswordDTO {
         this.id = user.getId();
         this.nickname = user.getNickname();
         this.email = user.getEmail();
-        this.password = user.getPassword();
         this.name = user.getName();
         this.addresses = user.getAddresses();
         this.phone = user.getPhone();
