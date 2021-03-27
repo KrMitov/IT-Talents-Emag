@@ -21,13 +21,13 @@ public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    public List<ProductDTO> getProductsFroCategory(int id) throws NotFoundException {
+    public List<ProductDTO> getProductsFroCategory(int id){
         Category category = categoryRepository.findById(id).orElse(null);
         if (category == null){
             throw new NotFoundException("Category not found");
         }
         List<Product> productsForCategory = category.getProducts();
-        if (productsForCategory.size() == 0){
+        if (productsForCategory.isEmpty()){
             throw new BadRequestException("No products for category");
         }
         List<ProductDTO> productsDTOList = new ArrayList<>();
@@ -50,7 +50,7 @@ public class CategoryService {
         }
     }
 
-    private Category getCategoryIfExists(int id){
+    public Category getCategoryIfExists(int id){
         Category category = categoryRepository.findById(id).orElse(null);
         if (category == null){
             throw new BadRequestException("The category does not exist");
@@ -86,7 +86,7 @@ public class CategoryService {
     public List<CategoryAndSubcategoriesDTO> getAllCategories() {
         List<CategoryAndSubcategoriesDTO> categories = new ArrayList<>();
         List<Category> categoriesWithoutParent = categoryRepository.findAllByParentCategoryIsNull();
-        if (categoriesWithoutParent.size() == 0){
+        if (categoriesWithoutParent.isEmpty()){
             throw new NotFoundException("No categories found");
         }
         categoriesWithoutParent.forEach(category -> categories.add(new CategoryAndSubcategoriesDTO(category)));

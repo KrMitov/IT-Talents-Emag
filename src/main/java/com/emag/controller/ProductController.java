@@ -1,10 +1,14 @@
 package com.emag.controller;
 
+import com.emag.model.dto.FilterProductsDTO;
 import com.emag.model.dto.ProductDTO;
 import com.emag.model.dto.RequestProductDTO;
 import com.emag.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import java.sql.SQLException;
+import java.util.List;
 
 @RestController
 public class ProductController extends AbstractController{
@@ -33,5 +37,15 @@ public class ProductController extends AbstractController{
     @GetMapping("/products/{id}")
     public ProductDTO getProductById(@PathVariable int id) {
         return productService.getProductById(id);
+    }
+
+    @GetMapping("/products/search/{keywordSequence}")
+    public List<ProductDTO> searchProductsByKeyword(@PathVariable String keywordSequence){
+        return productService.searchProductsByKeyword(keywordSequence);
+    }
+
+    @PostMapping("/products/filter")
+    public List<ProductDTO> filterProducts(@RequestBody FilterProductsDTO filterProductsDTO) throws SQLException {
+        return productService.filterProducts(filterProductsDTO);
     }
 }
