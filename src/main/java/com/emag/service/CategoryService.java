@@ -2,10 +2,10 @@ package com.emag.service;
 
 import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
-import com.emag.model.dto.categoryDTO.RequestCategoryDTO;
-import com.emag.model.dto.categoryDTO.CategoryAndSubcategoriesDTO;
-import com.emag.model.dto.categoryDTO.CategoryDTO;
-import com.emag.model.dto.produtcDTO.ProductDTO;
+import com.emag.model.dto.categorydto.RequestCategoryDTO;
+import com.emag.model.dto.categorydto.CategoryAndSubcategoriesDTO;
+import com.emag.model.dto.categorydto.CategoryDTO;
+import com.emag.model.dto.produtcdto.ProductDTO;
 import com.emag.model.pojo.Category;
 import com.emag.model.pojo.Product;
 import com.emag.model.repository.CategoryRepository;

@@ -1,6 +1,6 @@
 package com.emag.model.dto;
 
-import com.emag.model.dto.addressDTO.AddressDTO;
+import com.emag.model.dto.addressdto.AddressDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

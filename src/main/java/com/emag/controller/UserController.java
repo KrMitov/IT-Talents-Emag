@@ -1,9 +1,9 @@
 package com.emag.controller;
 
 import com.emag.model.dto.*;
-import com.emag.model.dto.registerDTO.RegisterRequestUserDTO;
-import com.emag.model.dto.registerDTO.RegisterResponseUserDTO;
-import com.emag.model.dto.userDTO.UserWithoutPasswordDTO;
+import com.emag.model.dto.registerdto.RegisterRequestUserDTO;
+import com.emag.model.dto.registerdto.RegisterResponseUserDTO;
+import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
 import com.emag.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

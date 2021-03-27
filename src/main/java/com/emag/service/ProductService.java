@@ -3,9 +3,9 @@ package com.emag.service;
 import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
 import com.emag.model.dao.ProductDAO;
-import com.emag.model.dto.produtcDTO.FilterProductsDTO;
-import com.emag.model.dto.produtcDTO.ProductDTO;
-import com.emag.model.dto.produtcDTO.RequestProductDTO;
+import com.emag.model.dto.produtcdto.FilterProductsDTO;
+import com.emag.model.dto.produtcdto.ProductDTO;
+import com.emag.model.dto.produtcdto.RequestProductDTO;
 import com.emag.model.pojo.Category;
 import com.emag.model.pojo.Product;
 import com.emag.model.repository.CategoryRepository;
@@ -157,9 +157,7 @@ public class ProductService {
         if (foundProduct.getDeletedAt() != null){
             throw new BadRequestException("The product is not available!");
         }
-        ProductDTO productDTO = new ProductDTO(foundProduct);
-//        productDTO.setReviews(reviewService.getReviewsForProduct());
-        return productDTO;
+        return new ProductDTO(foundProduct);
     }
 
     public List<ProductDTO> searchProductsByKeyword(String keywordSequence) {

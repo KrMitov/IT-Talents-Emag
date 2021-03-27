@@ -1,6 +1,6 @@
 package com.emag.model.pojo;
 
-import com.emag.model.dto.addressDTO.AddressDTO;
+import com.emag.model.dto.addressdto.AddressDTO;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

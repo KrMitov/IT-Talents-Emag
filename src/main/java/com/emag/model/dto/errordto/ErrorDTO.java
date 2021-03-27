@@ -1,4 +1,4 @@
-package com.emag.model.dto.errorDTO;
+package com.emag.model.dto.errordto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

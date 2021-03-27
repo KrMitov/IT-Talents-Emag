@@ -1,11 +1,14 @@
-package com.emag.model.dto.produtcDTO;
+package com.emag.model.dto.produtcdto;
 
-import com.emag.model.dto.categoryDTO.CategoryDTO;
+import com.emag.model.dto.categorydto.CategoryDTO;
 import com.emag.model.pojo.Product;
+import com.emag.model.pojo.Review;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,7 +26,7 @@ public class ProductDTO {
     private Integer quantity;
     private Integer warrantyYears;
     private CategoryDTO category;
-    //private List<Review> reviews;
+    private List<Review> reviews;
 
     public ProductDTO(Product product) {
         this.id = product.getId();
@@ -36,6 +39,6 @@ public class ProductDTO {
         this.quantity = product.getQuantity();
         this.warrantyYears = product.getWarrantyYears();
         this.category = new CategoryDTO(product.getCategory());
-        //this.reviews = new ArrayList<>();
+        this.reviews = product.getReviews();
     }
 }

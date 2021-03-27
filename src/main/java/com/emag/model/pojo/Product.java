@@ -1,6 +1,6 @@
 package com.emag.model.pojo;
 
-import com.emag.model.dto.produtcDTO.RequestProductDTO;
+import com.emag.model.dto.produtcdto.RequestProductDTO;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -38,6 +38,8 @@ public class Product {
     @ManyToMany(mappedBy = "likedProducts")
     @JsonBackReference
     private List<User> usersLikedThisProduct;
+    @OneToMany(mappedBy = "reviewedProduct")
+    private List<Review> reviews;
 
     public Product(RequestProductDTO requestProductDTO) {
         this.fullName = requestProductDTO.getFullName();

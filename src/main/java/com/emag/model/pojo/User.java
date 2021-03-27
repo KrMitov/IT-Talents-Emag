@@ -1,6 +1,6 @@
 package com.emag.model.pojo;
 
-import com.emag.model.dto.registerDTO.RegisterRequestUserDTO;
+import com.emag.model.dto.registerdto.RegisterRequestUserDTO;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
@@ -53,6 +53,8 @@ import java.util.List;
 
         )
        private List<Product> likedProducts;
+        @OneToMany(mappedBy = "reviewer")
+        private List<Review> reviews;
 
         public User(RegisterRequestUserDTO registerRequestUserDTO){
             this.email = registerRequestUserDTO.getEmail();

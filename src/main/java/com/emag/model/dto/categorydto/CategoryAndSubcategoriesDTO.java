@@ -1,4 +1,4 @@
-package com.emag.model.dto.categoryDTO;
+package com.emag.model.dto.categorydto;
 
 import com.emag.model.pojo.Category;
 import lombok.AllArgsConstructor;

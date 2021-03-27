@@ -1,6 +1,6 @@
-package com.emag.model.dto.userDTO;
+package com.emag.model.dto.userdto;
 
-import com.emag.model.dto.roleDTO.RoleWithoutUsersDTO;
+import com.emag.model.dto.roledto.RoleWithoutUsersDTO;
 import com.emag.model.pojo.Address;
 import com.emag.model.pojo.Product;
 import com.emag.model.pojo.User;

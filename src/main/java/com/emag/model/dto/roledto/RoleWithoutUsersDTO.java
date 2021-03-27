@@ -1,4 +1,4 @@
-package com.emag.model.dto.roleDTO;
+package com.emag.model.dto.roledto;
 
 import com.emag.model.pojo.Role;
 import lombok.Getter;
