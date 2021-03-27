@@ -1,7 +1,9 @@
 package com.emag.controller;
 
 import com.emag.model.dto.*;
-import com.emag.model.pojo.User;
+import com.emag.model.dto.registerDTO.RegisterRequestUserDTO;
+import com.emag.model.dto.registerDTO.RegisterResponseUserDTO;
+import com.emag.model.dto.userDTO.UserWithoutPasswordDTO;
 import com.emag.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +26,7 @@ public class UserController extends AbstractController{
     }
 
     @PostMapping("/users/login")
-    public UserWithoutPasswordDTO login(@RequestBody LoginRequestUserDTO dto,HttpSession session){
+    public UserWithoutPasswordDTO login(@RequestBody LoginRequestUserDTO dto, HttpSession session){
         UserWithoutPasswordDTO response = userService.login(dto);
         sessionManager.loginUser(session,response.getId());
         return response;

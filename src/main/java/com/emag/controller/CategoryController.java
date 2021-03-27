@@ -1,9 +1,9 @@
 package com.emag.controller;
 
-import com.emag.model.dto.RequestCategoryDTO;
-import com.emag.model.dto.CategoryAndSubcategoriesDTO;
-import com.emag.model.dto.CategoryDTO;
-import com.emag.model.dto.ProductDTO;
+import com.emag.model.dto.categoryDTO.RequestCategoryDTO;
+import com.emag.model.dto.categoryDTO.CategoryAndSubcategoriesDTO;
+import com.emag.model.dto.categoryDTO.CategoryDTO;
+import com.emag.model.dto.produtcDTO.ProductDTO;
 import com.emag.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

@@ -1,6 +1,7 @@
-package com.emag.model.dto;
+package com.emag.model.dto.registerDTO;
 
 
+import com.emag.model.dto.roleDTO.RoleWithoutUsersDTO;
 import com.emag.model.pojo.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -3,7 +3,7 @@ package com.emag.controller;
 import com.emag.exceptions.AuthenticationException;
 import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
-import com.emag.model.dto.ErrorDTO;
+import com.emag.model.dto.errorDTO.ErrorDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;

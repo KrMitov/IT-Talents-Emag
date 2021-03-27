@@ -1,4 +1,4 @@
-package com.emag.model.dto;
+package com.emag.model.dto.registerDTO;
 
 import com.emag.model.pojo.Role;
 import lombok.Getter;
@@ -14,6 +14,5 @@ public class RegisterRequestUserDTO {
     private String password;
     private String confirmPassword;
     private String name;
-    @Autowired
-    private RoleWithoutUsersDTO role;
+
 }

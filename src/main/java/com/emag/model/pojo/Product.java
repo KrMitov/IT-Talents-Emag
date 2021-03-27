@@ -1,6 +1,6 @@
 package com.emag.model.pojo;
 
-import com.emag.model.dto.RequestProductDTO;
+import com.emag.model.dto.produtcDTO.RequestProductDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

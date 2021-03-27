@@ -1,4 +1,4 @@
-package com.emag.model.dto;
+package com.emag.model.dto.categoryDTO;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;

@@ -1,6 +1,7 @@
 package com.emag.model.pojo;
 
-import com.emag.model.dto.AddressDTO;
+import com.emag.model.dto.addressDTO.AddressDTO;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,6 +25,7 @@ import java.util.List;
         private String street;
         private String number;
         @ManyToMany(mappedBy = "addresses")
+        @JsonBackReference
         private List<User> users;
 
         public Address(AddressDTO address) {

@@ -3,32 +3,28 @@ package com.emag.service;
 import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
 import com.emag.model.dto.*;
+import com.emag.model.dto.registerDTO.RegisterRequestUserDTO;
+import com.emag.model.dto.registerDTO.RegisterResponseUserDTO;
+import com.emag.model.dto.userDTO.UserWithoutPasswordDTO;
 import com.emag.model.pojo.Address;
 import com.emag.model.pojo.Role;
 import com.emag.model.pojo.User;
 import com.emag.model.repository.AddressRepository;
 import com.emag.model.repository.RoleRepository;
 import com.emag.model.repository.UserRepository;
-import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.sql.Date;
-import java.sql.Time;
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class UserService {
 
+    private static final int USER_ROLE_ID = 1;
     @Autowired
     UserRepository userRepository;
     @Autowired
@@ -42,18 +38,10 @@ public class UserService {
       if(userByEmail!=null){
           throw new BadRequestException("email already exists");
       }
-      if(dto.getRole().getId() <1 || dto.getRole().getId()>2){
-          throw new BadRequestException("wrong role credentials");
-      }
-      Optional<Role> roleFromDb = roleRepository.findById(dto.getRole().getId());
-      Role role = new Role();
+
+      Optional<Role> roleFromDb = roleRepository.findById(1);
+      Role role = roleFromDb.get() ;
       RegisterResponseUserDTO response;
-      if(roleFromDb.isEmpty()){
-          role.setRole_type(dto.getRole().getRole_Type());
-          role = roleRepository.save(role);
-      }else {
-          role = roleFromDb.get();
-      }
       PasswordEncoder encoder = new BCryptPasswordEncoder();
       dto.setPassword(encoder.encode(dto.getPassword()));
       User user = new User(dto);

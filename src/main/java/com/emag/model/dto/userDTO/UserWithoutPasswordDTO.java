@@ -1,17 +1,13 @@
-package com.emag.model.dto;
+package com.emag.model.dto.userDTO;
 
+import com.emag.model.dto.roleDTO.RoleWithoutUsersDTO;
 import com.emag.model.pojo.Address;
-import com.emag.model.pojo.Role;
 import com.emag.model.pojo.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.stereotype.Component;
 
-import java.sql.Time;
 import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 @Getter

@@ -1,6 +1,6 @@
 package com.emag.model.pojo;
 
-import com.emag.model.dto.RegisterRequestUserDTO;
+import com.emag.model.dto.registerDTO.RegisterRequestUserDTO;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
@@ -8,11 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 
 
 @Getter
@@ -31,6 +29,7 @@ import java.util.Set;
         //    @OneToMany(mappedBy = "user")
 //    @JsonManagedReference
         @ManyToMany
+        @JsonManagedReference
         @JoinTable(
                 name="saved_addresses",
                 joinColumns = {@JoinColumn(name="user_id")},
