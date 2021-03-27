@@ -1,6 +1,7 @@
 package com.emag.controller;
 
-import com.emag.model.dto.FilterProductsDTO;
+
+import com.emag.model.dto.produtcDTO.FilterProductsDTO;
 import com.emag.model.dto.produtcDTO.ProductDTO;
 import com.emag.model.dto.produtcDTO.RequestProductDTO;
 import com.emag.service.ProductService;

@@ -44,6 +44,15 @@ import java.util.List;
         private Timestamp birthDate;
         private Timestamp createdAt;
         private String profile_picture;
+        @ManyToMany
+        @JsonManagedReference
+        @JoinTable(
+            name="users_like_products",
+                    joinColumns = {@JoinColumn(name="user_id")},
+            inverseJoinColumns = {@JoinColumn(name="product_id")}
+
+        )
+       private List<Product> likedProducts;
 
         public User(RegisterRequestUserDTO registerRequestUserDTO){
             this.email = registerRequestUserDTO.getEmail();
