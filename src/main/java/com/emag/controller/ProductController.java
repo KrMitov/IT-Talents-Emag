@@ -1,9 +1,11 @@
 package com.emag.controller;
 
 
+import com.emag.model.dto.produtcdto.FavouriteProductDTO;
 import com.emag.model.dto.produtcdto.FilterProductsDTO;
 import com.emag.model.dto.produtcdto.ProductDTO;
 import com.emag.model.dto.produtcdto.RequestProductDTO;
+import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
 import com.emag.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -48,5 +50,15 @@ public class ProductController extends AbstractController{
     @PostMapping("/products/filter")
     public List<ProductDTO> filterProducts(@RequestBody FilterProductsDTO filterProductsDTO) throws SQLException {
         return productService.filterProducts(filterProductsDTO);
+    }
+
+    @PostMapping("/products/favourite")
+    public UserWithoutPasswordDTO makeProductFavourite(@RequestBody FavouriteProductDTO favouriteProductDTO){
+        return productService.makeProductFavourite(favouriteProductDTO);
+    }
+
+    @DeleteMapping("/products/favourite")
+    public UserWithoutPasswordDTO removeFavouriteProduct(@RequestBody FavouriteProductDTO favouriteProductDTO){
+        return productService.removeFavouriteProduct(favouriteProductDTO);
     }
 }

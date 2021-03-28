@@ -3,13 +3,17 @@ package com.emag.service;
 import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
 import com.emag.model.dao.ProductDAO;
+import com.emag.model.dto.produtcdto.FavouriteProductDTO;
 import com.emag.model.dto.produtcdto.FilterProductsDTO;
 import com.emag.model.dto.produtcdto.ProductDTO;
 import com.emag.model.dto.produtcdto.RequestProductDTO;
+import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
 import com.emag.model.pojo.Category;
 import com.emag.model.pojo.Product;
+import com.emag.model.pojo.User;
 import com.emag.model.repository.CategoryRepository;
 import com.emag.model.repository.ProductRepository;
+import com.emag.model.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +31,8 @@ public class ProductService {
     private ProductRepository productRepository;
     @Autowired
     private CategoryRepository categoryRepository;
+    @Autowired
+    private UserRepository userRepository;
     @Autowired
     private ProductDAO productDAO;
     @Autowired
@@ -82,12 +88,22 @@ public class ProductService {
         return new ProductDTO(productRepository.save(product));
     }
 
+    //TODO move to util class
     private Product getProductIfExists(int id){
         Product product = productRepository.findById(id).orElse(null);
         if (product == null){
             throw new BadRequestException("The product does not exist");
         }
         return product;
+    }
+
+    //TODO move to util class
+    public User getUserIfExists(int id){
+        User user = userRepository.findById(id).orElse(null);
+        if (user == null){
+            throw new BadRequestException("The user does not exist");
+        }
+        return user;
     }
 
     //move to util class?
@@ -247,27 +263,28 @@ public class ProductService {
         return products;
     }
 
-    /*
-        SELECT * FROM products WHERE
-        deleted_at IS NOT NULL
-        AND
-        category_id = ?
-        AND
-        full_name LIKE ? OR description LIKE ?
-        AND
-        brand LIKE ?
-        AND
-        model LIKE ?
-        AND
-        IF(discounted_price IS NOT NULL, discounted_price, regular_price) <= ?
-        AND
-        IF(discounted_price IS NOT NULL, discounted_price, regular_price) >= ?
-        AND
-        discounted_price IS NOT NULL
-        ORDER BY IF(discounted_price IS NOT NULL, discounted_price, regular_price)
-        DESC
-        LIMIT ?
-        OFFSET ?
-        //offset = pageNumber - 1 * productsPerPage
-     */
+
+    public UserWithoutPasswordDTO makeProductFavourite(FavouriteProductDTO favouriteProductDTO) {
+        User user =  getUserIfExists(favouriteProductDTO.getUserId());
+        Product product = getProductIfExists(favouriteProductDTO.getProductId());
+        List<Product> likedProducts = user.getLikedProducts();
+        if (likedProducts.contains(product)){
+            throw new BadRequestException("User has already liked this product");
+        }
+        likedProducts.add(product);
+        user.setLikedProducts(likedProducts);
+        return new UserWithoutPasswordDTO(userRepository.save(user));
+    }
+
+    public UserWithoutPasswordDTO removeFavouriteProduct(FavouriteProductDTO favouriteProductDTO) {
+        User user =  getUserIfExists(favouriteProductDTO.getUserId());
+        Product product = getProductIfExists(favouriteProductDTO.getProductId());
+        List<Product> likedProducts = user.getLikedProducts();
+        if (!likedProducts.contains(product)){
+            throw new BadRequestException("User does not like this product");
+        }
+        likedProducts.remove(product);
+        user.setLikedProducts(likedProducts);
+        return new UserWithoutPasswordDTO(userRepository.save(user));
+    }
 }

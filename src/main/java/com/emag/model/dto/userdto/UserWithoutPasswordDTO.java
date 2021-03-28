@@ -1,5 +1,6 @@
 package com.emag.model.dto.userdto;
 
+import com.emag.model.dto.produtcdto.ProductDTO;
 import com.emag.model.dto.roledto.RoleWithoutUsersDTO;
 import com.emag.model.pojo.Address;
 import com.emag.model.pojo.Product;
@@ -28,7 +29,7 @@ public class UserWithoutPasswordDTO {
     private Timestamp birthdate;
     private Timestamp createdAt;
     private String profile_picture;
-    private List<Product> likedProducts;
+    private List<ProductDTO> likedProducts;
     private List<UserCartDTO> productsInCart;
 
     public UserWithoutPasswordDTO(User user){
@@ -44,7 +45,11 @@ public class UserWithoutPasswordDTO {
         }
         this.createdAt = user.getCreatedAt();
         this.profile_picture = user.getProfile_picture();
-        this.likedProducts = user.getLikedProducts();
+        this.likedProducts = new ArrayList<>();
+        for (Product product : user.getLikedProducts()) {
+            ProductDTO dto = new ProductDTO(product);
+            this.likedProducts.add(dto);
+        }
         this.productsInCart = new ArrayList<>();
         for (UserCarts userCart : user.getProductsInCart()) {
             UserCartDTO dto = new UserCartDTO(userCart);
