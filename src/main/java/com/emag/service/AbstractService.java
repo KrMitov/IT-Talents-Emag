@@ -56,4 +56,12 @@ public abstract class AbstractService {
     protected Review getReview(Product product, User user){
         return reviewRepository.findByReviewedProductAndReviewer(product, user);
     }
+
+    protected Review getReviewIfExists(int id){
+        Review review = reviewRepository.findById(id).orElse(null);
+        if (review == null){
+            throw new BadRequestException("The review does not exist");
+        }
+        return review;
+    }
 }

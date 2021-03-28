@@ -8,6 +8,7 @@ import com.emag.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 
 @RestController
@@ -15,27 +16,29 @@ public class CategoryController extends AbstractController{
 
     @Autowired
     private CategoryService categoryService;
+    @Autowired
+    private SessionManager sessionManager;
 
     @GetMapping("/category/{id}")
-    public List<ProductDTO> getProductsFroCategory(@PathVariable int id){
-        return categoryService.getProductsFroCategory(id);
+    public List<ProductDTO> getProductsFromCategory(@PathVariable int id){
+        return categoryService.getProductsFromCategory(id);
     }
 
     @PostMapping("/category")
-    public CategoryDTO addCategory(@RequestBody RequestCategoryDTO requestCategoryDTO){
-        //check the session if the logged user is admin
+    public CategoryDTO addCategory(@RequestBody RequestCategoryDTO requestCategoryDTO, HttpSession session){
+        sessionManager.adminVerification(session);
         return categoryService.addCategory(requestCategoryDTO);
     }
 
     @PutMapping("/category/{id}")
-    public CategoryDTO editCategory(@PathVariable int id, @RequestBody RequestCategoryDTO requestCategoryDTO){
-        //check the session if the logged user is admin
+    public CategoryDTO editCategory(@PathVariable int id, @RequestBody RequestCategoryDTO requestCategoryDTO, HttpSession session){
+        sessionManager.adminVerification(session);
         return categoryService.editCategory(id, requestCategoryDTO);
     }
 
     @DeleteMapping("/category/{id}")
-    public CategoryAndSubcategoriesDTO deleteCategory(@PathVariable int id){
-        //check the session if the logged user is admin
+    public CategoryAndSubcategoriesDTO deleteCategory(@PathVariable int id, HttpSession session){
+        sessionManager.adminVerification(session);
         return categoryService.deleteCategory(id);
     }
 

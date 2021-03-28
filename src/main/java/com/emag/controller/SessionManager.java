@@ -13,6 +13,7 @@ import javax.servlet.http.HttpSession;
 public class SessionManager {
 
     private static final String LOGGED_USER_ID = "LOGGED_USER_ID";
+    private static final int ADMIN_ID = 2;
     @Autowired
     private UserRepository userRepository;
 
@@ -23,6 +24,12 @@ public class SessionManager {
           int userId = (int) session.getAttribute(LOGGED_USER_ID);
           return userRepository.findById(userId).get();
       }
+    }
+
+    public void adminVerification(HttpSession session){
+        if (getLoggedUser(session).getRole().getId() != ADMIN_ID){
+            throw new AuthenticationException("Action forbidden! Admin rights required!");
+        }
     }
 
     public void loginUser(HttpSession session,int id){

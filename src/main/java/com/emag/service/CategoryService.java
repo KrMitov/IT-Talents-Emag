@@ -11,23 +11,28 @@ import com.emag.model.pojo.Product;
 import com.emag.service.validatorservice.CategoryValidator;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional
 public class CategoryService extends AbstractService{
 
-    public List<ProductDTO> getProductsFroCategory(int id){
-        Category category = categoryRepository.findById(id).orElse(null);
-        if (category == null){
+    public List<ProductDTO> getProductsFromCategory(int id){
+        Category category;
+        try {
+            category = getCategoryIfExists(id);
+        }
+        catch (BadRequestException e){
             throw new NotFoundException("Category not found");
         }
         List<Product> productsForCategory = category.getProducts();
-        if (productsForCategory.isEmpty()){
-            throw new BadRequestException("No products for category");
-        }
         List<ProductDTO> productsDTOList = new ArrayList<>();
         productsForCategory.forEach(product -> productsDTOList.add(new ProductDTO(product)));
+        for (Category subCategory : category.getSubCategories()){
+            productsDTOList.addAll(getProductsFromCategory(subCategory.getId()));
+        }
         return productsDTOList;
     }
 

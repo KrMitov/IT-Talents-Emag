@@ -9,7 +9,10 @@ import com.emag.model.pojo.User;
 import com.emag.service.validatorservice.ReviewValidator;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+
 @Service
+@Transactional
 public class ReviewService extends AbstractService{
 
     public ReviewDTO addReview(RequestReviewDTO requestReviewDTO, int userId) {
@@ -34,5 +37,15 @@ public class ReviewService extends AbstractService{
         review.setDescription(requestReviewDTO.getDescription());
         review.setRating(requestReviewDTO.getRating());
         return new ReviewDTO(reviewRepository.save(review));
+    }
+
+    public ReviewDTO likeReview(int reviewId, int userId) {
+        Review review = getReviewIfExists(reviewId);
+        User user = getUserIfExists(userId);
+//        if (user.getLikedReviews().contains(review)){
+//            throw new BadRequestException("You have already liked this product");
+//        }
+        //TODO users_like_reviews M:M
+        return null;
     }
 }

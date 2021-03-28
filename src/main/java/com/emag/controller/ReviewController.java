@@ -4,10 +4,7 @@ import com.emag.model.dto.reviewdto.RequestReviewDTO;
 import com.emag.model.dto.reviewdto.ReviewDTO;
 import com.emag.service.ReviewService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 
@@ -19,12 +16,18 @@ public class ReviewController extends AbstractController{
     @Autowired
     private ReviewService reviewService;
 
-    @PostMapping("/review")
+    @PostMapping("/reviews")
     public ReviewDTO addReview(@RequestBody RequestReviewDTO requestReviewDTO, HttpSession session){
         return reviewService.addReview(requestReviewDTO, sessionManager.getLoggedUser(session).getId());
     }
-    @PutMapping("/review")
+
+    @PutMapping("/reviews")
     public ReviewDTO editReview(@RequestBody RequestReviewDTO requestReviewDTO, HttpSession session){
         return reviewService.editReview(requestReviewDTO, sessionManager.getLoggedUser(session).getId());
+    }
+
+    @PostMapping("/reviews/{id}/like")
+    public ReviewDTO likeReview(@PathVariable int id, HttpSession session){
+        return reviewService.likeReview(id, sessionManager.getLoggedUser(session).getId());
     }
 }

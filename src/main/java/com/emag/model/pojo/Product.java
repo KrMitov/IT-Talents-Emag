@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -54,6 +55,9 @@ public class Product {
         this.description = requestProductDTO.getDescription();
         this.quantity = requestProductDTO.getQuantity();
         this.warrantyYears = requestProductDTO.getWarrantyYears();
+        this.reviews = new ArrayList<>();
+        this.usersLikedThisProduct = new ArrayList<>();
+        this.productsInCart = new ArrayList<>();
     }
 
     @Override
