@@ -8,12 +8,9 @@ import com.emag.model.dto.produtcdto.FilterProductsDTO;
 import com.emag.model.dto.produtcdto.ProductDTO;
 import com.emag.model.dto.produtcdto.RequestProductDTO;
 import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
-import com.emag.model.pojo.Category;
 import com.emag.model.pojo.Product;
 import com.emag.model.pojo.User;
-import com.emag.model.repository.CategoryRepository;
-import com.emag.model.repository.ProductRepository;
-import com.emag.model.repository.UserRepository;
+import com.emag.service.validatorservice.ProductValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,18 +22,10 @@ import java.util.HashSet;
 import java.util.List;
 
 @Service
-public class ProductService {
+public class ProductService extends AbstractService{
 
     @Autowired
-    private ProductRepository productRepository;
-    @Autowired
-    private CategoryRepository categoryRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
     private ProductDAO productDAO;
-    @Autowired
-    private CategoryService categoryService;
 
     //TODO move to util class
     private RequestProductDTO trimProductInputData(RequestProductDTO requestProductDTO){
@@ -49,62 +38,12 @@ public class ProductService {
         return requestProductDTO;
     }
 
-    //TODO move to util class
-    private void validateProductInputData(RequestProductDTO requestProductDTO){
-        if (requestProductDTO.getFullName() == null || requestProductDTO.getFullName().trim().equals("")){
-            throw new BadRequestException("Invalid product name");
-        }
-        if (requestProductDTO.getBrand() == null || requestProductDTO.getBrand().trim().equals("")){
-            throw new BadRequestException("Invalid brand name");
-        }
-        if (requestProductDTO.getModel() == null || requestProductDTO.getModel().trim().equals("")){
-            throw new BadRequestException("Invalid model name");
-        }
-        if (requestProductDTO.getRegularPrice() == null || requestProductDTO.getRegularPrice() <= 0){
-            throw new BadRequestException("Invalid regular price for product");
-        }
-        if (requestProductDTO.getDiscountedPrice() != null && (requestProductDTO.getDiscountedPrice() <= 0
-                || requestProductDTO.getDiscountedPrice() >= requestProductDTO.getRegularPrice())){
-            throw new BadRequestException("Invalid discounted price for product");
-        }
-        if (requestProductDTO.getDescription() != null && requestProductDTO.getDescription().trim().equals("")){
-            requestProductDTO.setDescription(null);
-        }
-        if (requestProductDTO.getQuantity() == null || requestProductDTO.getQuantity() <= 0){
-            throw new BadRequestException("Invalid product quantity");
-        }
-        if (requestProductDTO.getWarrantyYears() != null && requestProductDTO.getWarrantyYears() < 0){
-            throw new BadRequestException("Invalid warranty years for product");
-        }
-        if (categoryRepository.findById(requestProductDTO.getCategoryId()).orElse(null) == null){
-            throw new BadRequestException("Invalid category id");
-        }
-    }
-
     public ProductDTO addProduct(RequestProductDTO requestProductDTO) {
-        validateProductInputData(requestProductDTO);
+        ProductValidator.validateProductInputData(requestProductDTO);
         requestProductDTO = trimProductInputData(requestProductDTO);
         Product product = new Product(requestProductDTO);
-        product.setCategory(categoryRepository.findById(requestProductDTO.getCategoryId()).get());
+        product.setCategory(getCategoryIfExists(requestProductDTO.getCategoryId()));
         return new ProductDTO(productRepository.save(product));
-    }
-
-    //TODO move to util class
-    public Product getProductIfExists(int id){
-        Product product = productRepository.findById(id).orElse(null);
-        if (product == null){
-            throw new BadRequestException("The product does not exist");
-        }
-        return product;
-    }
-
-    //TODO move to util class
-    public User getUserIfExists(int id){
-        User user = userRepository.findById(id).orElse(null);
-        if (user == null){
-            throw new BadRequestException("The user does not exist");
-        }
-        return user;
     }
 
     //move to util class?
@@ -145,11 +84,7 @@ public class ProductService {
         }
         Integer categoryId = requestProductDTO.getCategoryId();
         if (categoryId != null) {
-            Category category = categoryRepository.findById(categoryId).orElse(null);
-            if (category == null) {
-                throw new BadRequestException("Invalid category id");
-            }
-            product.setCategory(category);
+            product.setCategory(getCategoryIfExists(categoryId));
         }
         return product;
     }
@@ -167,8 +102,11 @@ public class ProductService {
     }
 
     public ProductDTO getProductById(int id){
-        Product foundProduct = productRepository.findById(id).orElse(null);
-        if (foundProduct == null){
+        Product foundProduct;
+        try {
+            foundProduct = getProductIfExists(id);
+        }
+        catch (BadRequestException e){
             throw new NotFoundException("Product not found");
         }
         if (foundProduct.getDeletedAt() != null){
@@ -199,7 +137,7 @@ public class ProductService {
         StringBuilder queryParams = new StringBuilder();
         List<Integer> productsPerPageParams = new ArrayList<>();
         Integer categoryId = filter.getCategoryId();
-        if (categoryId != null && categoryService.getCategoryIfExists(categoryId) != null){
+        if (categoryId != null && getCategoryIfExists(categoryId) != null){
             query.append("category_id = ? AND ");
             queryParams.append(categoryId.toString()).append(",");
         }

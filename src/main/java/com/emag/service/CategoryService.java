@@ -8,18 +8,14 @@ import com.emag.model.dto.categorydto.CategoryDTO;
 import com.emag.model.dto.produtcdto.ProductDTO;
 import com.emag.model.pojo.Category;
 import com.emag.model.pojo.Product;
-import com.emag.model.repository.CategoryRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.emag.service.validatorservice.CategoryValidator;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
-public class CategoryService {
-
-    @Autowired
-    private CategoryRepository categoryRepository;
+public class CategoryService extends AbstractService{
 
     public List<ProductDTO> getProductsFroCategory(int id){
         Category category = categoryRepository.findById(id).orElse(null);
@@ -35,44 +31,21 @@ public class CategoryService {
         return productsDTOList;
     }
 
-    private void validateCategoryInputData(RequestCategoryDTO requestCategoryDTO){
-        String name = requestCategoryDTO.getName();
-        if (name == null || name.equals("")){
-            throw new BadRequestException("Category name cannot be null or empty string");
-        }
-        if (requestCategoryDTO.getParentCategoryId() == 0){
-            //parentCategoryId = 0 means that the category has no parent category
-            return;
-        }
-        Category parentCategory = categoryRepository.findById(requestCategoryDTO.getParentCategoryId()).orElse(null);
-        if (parentCategory == null){
-            throw new BadRequestException("Parent category with such id does not exists");
-        }
-    }
-
-    public Category getCategoryIfExists(int id){
-        Category category = categoryRepository.findById(id).orElse(null);
-        if (category == null){
-            throw new BadRequestException("The category does not exist");
-        }
-        return category;
-    }
-
     public CategoryDTO addCategory(RequestCategoryDTO requestCategoryDTO) {
-        requestCategoryDTO.setName(requestCategoryDTO.getName().trim());
-        validateCategoryInputData(requestCategoryDTO);
+        String trimmedName = requestCategoryDTO.getName().trim();
+        CategoryValidator.validateCategoryName(trimmedName);
         Category category = new Category();
-        category.setName(requestCategoryDTO.getName());
-        category.setParentCategory(categoryRepository.findById(requestCategoryDTO.getParentCategoryId()).orElse(null));
+        category.setName(trimmedName);
+        category.setParentCategory(getParentCategory(requestCategoryDTO.getParentCategoryId()));
         return new CategoryDTO(categoryRepository.save(category));
     }
 
     public CategoryDTO editCategory(int id, RequestCategoryDTO requestCategoryDTO) {
         Category editedCategory = getCategoryIfExists(id);
-        requestCategoryDTO.setName(requestCategoryDTO.getName().trim());
-        validateCategoryInputData(requestCategoryDTO);
-        editedCategory.setName(requestCategoryDTO.getName());
-        editedCategory.setParentCategory(categoryRepository.findById(requestCategoryDTO.getParentCategoryId()).orElse(null));
+        String trimmedName = requestCategoryDTO.getName().trim();
+        CategoryValidator.validateCategoryName(trimmedName);
+        editedCategory.setName(trimmedName);
+        editedCategory.setParentCategory(getParentCategory(requestCategoryDTO.getParentCategoryId()));
         return new CategoryDTO(categoryRepository.save(editedCategory));
     }
 
