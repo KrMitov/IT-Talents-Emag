@@ -3,6 +3,8 @@ package com.emag.service;
 import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
 import com.emag.model.dto.*;
+import com.emag.model.dto.produtcdto.LikedProductsForUserDTO;
+import com.emag.model.dto.produtcdto.ProductsFromCartForUserDTO;
 import com.emag.model.dto.registerdto.RegisterRequestUserDTO;
 import com.emag.model.dto.registerdto.RegisterResponseUserDTO;
 import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
@@ -30,8 +32,6 @@ public class UserService {
     RoleRepository roleRepository;
     @Autowired
     AddressRepository addressRepository;
-//    @Autowired
-//    ProductRepository productRepository;
 
   public RegisterResponseUserDTO register(RegisterRequestUserDTO dto){
       String email = dto.getEmail();
@@ -39,7 +39,6 @@ public class UserService {
       if(userByEmail!=null){
           throw new BadRequestException("email already exists");
       }
-
       Optional<Role> roleFromDb = roleRepository.findById(1);
       Role role = roleFromDb.get() ;
       RegisterResponseUserDTO response;
@@ -130,22 +129,17 @@ public class UserService {
       }
   }
 
-//  public UserWithoutPasswordDTO addProductToCart(int productId,int userId){
-//      Optional<Product> productFromDb = productRepository.findById(productId);
-//      Optional<User> userFromDb = userRepository.findById(userId);
-//      Product product = productFromDb.get();
-//      User user = userFromDb.get();
-//      List<UserCarts> productsInCart = user.getProductsInCart();
-//      UserCarts cart = new UserCarts();
-//      cart.setProduct(product);
-//      cart.setUser(user);
-//      cart.setQuantity(1);
-//      productsInCart.add(cart);
-//      user.getProductsInCart().addAll(productsInCart);
-//      user = userRepository.save(user);
-//      return new UserWithoutPasswordDTO(user);
+  public LikedProductsForUserDTO getLikedProducts(int userId){
+      Optional<User> userFromDb = userRepository.findById(userId);
+      User user = userFromDb.get();
+      return new LikedProductsForUserDTO(user);
+  }
 
-//  }
+  public ProductsFromCartForUserDTO getProductsFromCart(int id){
+      Optional<User> userFromDb = userRepository.findById(id);
+      User user = userFromDb.get();
+      return new ProductsFromCartForUserDTO(user);
+  }
 
   private boolean containsAddress(Address address,User user){
       boolean result = false;

@@ -1,22 +1,42 @@
 package com.emag.controller;
 
-import com.emag.model.dto.AddToCartDTO;
-import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
-import com.emag.service.UserService;
+
+import com.emag.exceptions.BadRequestException;
+import com.emag.model.dto.cartdto.CartDTO;
+import com.emag.model.dto.cartdto.UpdateCartQuantityDTO;
+import com.emag.service.CartService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpSession;
 
 @RestController
-public class CartController {
+public class CartController extends AbstractController{
 
     @Autowired
-    UserService userService;
+    CartService cartService;
+    @Autowired
+    SessionManager sessionManager;
 
-//    @PostMapping("/cart")
-//    public UserWithoutPasswordDTO addProductToCArt(@RequestBody AddToCartDTO dto){
-////           return userService.addProductToCart(dto.getProductId(),dto.getUserId());
-//    }
+    @PostMapping("/cart")
+    public void addProductToCArt(@RequestBody CartDTO dto, HttpSession session){
+           sessionManager.getLoggedUser(session);
+           cartService.addProductToCart(dto.getProductId(),dto.getUserId());
+    }
+
+    @DeleteMapping("/cart")
+    public void removeProduct(@RequestBody CartDTO dto,HttpSession session){
+        sessionManager.getLoggedUser(session);
+        cartService.removeProductFromCart(dto.getProductId(),dto.getUserId());
+    }
+
+    @PutMapping("/cart/edit")
+    public void changeQuantity(@RequestBody UpdateCartQuantityDTO dto,HttpSession session){
+        sessionManager.getLoggedUser(session);
+        if(dto.getQuantity()<1 || dto.getQuantity()>50){
+            throw new BadRequestException("wrong quantity for product");
+        }
+        cartService.changeQuantityOfProduct(dto.getProductId(),dto.getUserId(),dto.getQuantity());
+    }
 
 }

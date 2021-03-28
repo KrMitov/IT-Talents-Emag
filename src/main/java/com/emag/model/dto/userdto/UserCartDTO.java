@@ -1,7 +1,9 @@
 package com.emag.model.dto.userdto;
 
+import com.emag.model.dto.produtcdto.ProductDTO;
 import com.emag.model.pojo.Product;
-import com.emag.model.pojo.UserCarts;
+import com.emag.model.pojo.UserCart;
+
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,11 +13,11 @@ import lombok.Setter;
 @NoArgsConstructor
 public class UserCartDTO {
 
-    private Product product;
+    private ProductDTO product;
     private int quantity;
 
-    public UserCartDTO(UserCarts userCart) {
-        this.product = userCart.getProduct();
+    public UserCartDTO(UserCart userCart) {
+        this.product = new ProductDTO(userCart.getProduct());
         this.quantity = userCart.getQuantity();
     }
 }

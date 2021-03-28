@@ -11,7 +11,7 @@ import javax.persistence.*;
 @Setter
 @NoArgsConstructor
 @Table(name = "user_carts")
-public class UserCarts {
+public class UserCart{
     @EmbeddedId
     private UserCartsKey primaryKey;
     @ManyToOne
