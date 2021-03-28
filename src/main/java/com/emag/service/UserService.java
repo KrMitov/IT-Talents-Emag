@@ -6,10 +6,9 @@ import com.emag.model.dto.*;
 import com.emag.model.dto.registerdto.RegisterRequestUserDTO;
 import com.emag.model.dto.registerdto.RegisterResponseUserDTO;
 import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
-import com.emag.model.pojo.Address;
-import com.emag.model.pojo.Role;
-import com.emag.model.pojo.User;
+import com.emag.model.pojo.*;
 import com.emag.model.repository.AddressRepository;
+import com.emag.model.repository.ProductRepository;
 import com.emag.model.repository.RoleRepository;
 import com.emag.model.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +30,8 @@ public class UserService {
     RoleRepository roleRepository;
     @Autowired
     AddressRepository addressRepository;
+//    @Autowired
+//    ProductRepository productRepository;
 
   public RegisterResponseUserDTO register(RegisterRequestUserDTO dto){
       String email = dto.getEmail();
@@ -128,6 +129,23 @@ public class UserService {
          return  new UserWithoutPasswordDTO(user);
       }
   }
+
+//  public UserWithoutPasswordDTO addProductToCart(int productId,int userId){
+//      Optional<Product> productFromDb = productRepository.findById(productId);
+//      Optional<User> userFromDb = userRepository.findById(userId);
+//      Product product = productFromDb.get();
+//      User user = userFromDb.get();
+//      List<UserCarts> productsInCart = user.getProductsInCart();
+//      UserCarts cart = new UserCarts();
+//      cart.setProduct(product);
+//      cart.setUser(user);
+//      cart.setQuantity(1);
+//      productsInCart.add(cart);
+//      user.getProductsInCart().addAll(productsInCart);
+//      user = userRepository.save(user);
+//      return new UserWithoutPasswordDTO(user);
+
+//  }
 
   private boolean containsAddress(Address address,User user){
       boolean result = false;

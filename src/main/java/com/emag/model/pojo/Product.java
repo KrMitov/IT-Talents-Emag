@@ -6,12 +6,14 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 
+@Component
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -40,6 +42,8 @@ public class Product {
     private List<User> usersLikedThisProduct;
     @OneToMany(mappedBy = "reviewedProduct")
     private List<Review> reviews;
+    @OneToMany(mappedBy = "product")
+    private List<UserCarts> productsInCart;
 
     public Product(RequestProductDTO requestProductDTO) {
         this.fullName = requestProductDTO.getFullName();

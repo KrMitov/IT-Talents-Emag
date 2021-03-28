@@ -6,18 +6,19 @@ import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
+@Component
 @Getter
-    @Setter
-    @NoArgsConstructor
-    @Entity
-    @Table(name = "users")
+@Setter
+@NoArgsConstructor
+@Entity
+@Table(name = "users")
     public class User {
         @Id
         @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -52,9 +53,11 @@ import java.util.List;
             inverseJoinColumns = {@JoinColumn(name="product_id")}
 
         )
-       private List<Product> likedProducts;
+        private List<Product> likedProducts;
         @OneToMany(mappedBy = "reviewer")
         private List<Review> reviews;
+        @OneToMany(mappedBy = "user")
+        private List<UserCarts> productsInCart;
 
         public User(RegisterRequestUserDTO registerRequestUserDTO){
             this.email = registerRequestUserDTO.getEmail();
