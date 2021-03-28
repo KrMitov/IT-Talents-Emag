@@ -5,7 +5,6 @@ import com.emag.model.dto.roledto.RoleWithoutUsersDTO;
 import com.emag.model.pojo.Address;
 import com.emag.model.pojo.Product;
 import com.emag.model.pojo.User;
-import com.emag.model.pojo.UserCarts;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -29,8 +28,6 @@ public class UserWithoutPasswordDTO {
     private Timestamp birthdate;
     private Timestamp createdAt;
     private String profile_picture;
-    private List<ProductDTO> likedProducts;
-    private List<UserCartDTO> productsInCart;
 
     public UserWithoutPasswordDTO(User user){
         this.id = user.getId();
@@ -45,16 +42,6 @@ public class UserWithoutPasswordDTO {
         }
         this.createdAt = user.getCreatedAt();
         this.profile_picture = user.getProfile_picture();
-        this.likedProducts = new ArrayList<>();
-        for (Product product : user.getLikedProducts()) {
-            ProductDTO dto = new ProductDTO(product);
-            this.likedProducts.add(dto);
-        }
-        this.productsInCart = new ArrayList<>();
-        for (UserCarts userCart : user.getProductsInCart()) {
-            UserCartDTO dto = new UserCartDTO(userCart);
-            this.productsInCart.add(dto);
-        }
     }
 
 }

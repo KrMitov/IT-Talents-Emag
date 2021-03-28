@@ -1,6 +1,8 @@
 package com.emag.controller;
 
 import com.emag.model.dto.*;
+import com.emag.model.dto.produtcdto.LikedProductsForUserDTO;
+import com.emag.model.dto.produtcdto.ProductsFromCartForUserDTO;
 import com.emag.model.dto.registerdto.RegisterRequestUserDTO;
 import com.emag.model.dto.registerdto.RegisterResponseUserDTO;
 import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
@@ -40,6 +42,7 @@ public class UserController extends AbstractController{
 
     @PostMapping("/users/logout")
     public String logout(HttpSession session){
+        sessionManager.getLoggedUser(session);
         sessionManager.logoutUser(session);
         return "you logged out";
     }
@@ -48,6 +51,18 @@ public class UserController extends AbstractController{
     public UserWithoutPasswordDTO editUser(@PathVariable int id, @RequestBody EditProfileRequestDTO dto,HttpSession session) throws ParseException {
           sessionManager.getLoggedUser(session);
           return userService.editUser(id,dto);
+    }
+
+    @GetMapping("/users/{id}/favourites")
+    public LikedProductsForUserDTO getFavoriteProducts(@PathVariable int id,HttpSession session){
+        sessionManager.getLoggedUser(session);
+        return userService.getLikedProducts(id);
+    }
+
+    @GetMapping("/users/{id}/cart")
+    public ProductsFromCartForUserDTO getProductsFromCart(@PathVariable int id,HttpSession session){
+        sessionManager.getLoggedUser(session);
+         return userService.getProductsFromCart(id);
     }
 
 

@@ -1,5 +1,6 @@
 package com.emag.model.pojo;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -28,6 +29,7 @@ public class Category {
     @OneToMany(mappedBy = "parentCategory")
     private List<Category> subCategories;
     @OneToMany(mappedBy = "category")
+    @JsonBackReference
     private List<Product> products;
 
     public List<Product> getProducts() {

@@ -44,7 +44,8 @@ public class Product {
     @OneToMany(mappedBy = "reviewedProduct")
     private List<Review> reviews;
     @OneToMany(mappedBy = "product")
-    private List<UserCarts> productsInCart;
+    @JsonBackReference
+    private List<UserCart> productsInCart;
 
     public Product(RequestProductDTO requestProductDTO) {
         this.fullName = requestProductDTO.getFullName();

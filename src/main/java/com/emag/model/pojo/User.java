@@ -57,7 +57,7 @@ import java.util.List;
         @OneToMany(mappedBy = "reviewer")
         private List<Review> reviews;
         @OneToMany(mappedBy = "user")
-        private List<UserCarts> productsInCart;
+        private List<UserCart> productsInCart;
 
         public User(RegisterRequestUserDTO registerRequestUserDTO){
             this.email = registerRequestUserDTO.getEmail();
