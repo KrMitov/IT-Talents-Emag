@@ -1,5 +1,6 @@
 package com.emag.model.pojo;
 
+import com.emag.model.dto.reviewdto.RequestReviewDTO;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -30,4 +31,14 @@ public class Review {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User reviewer;
+
+    public Review(RequestReviewDTO requestReviewDTO, Product product, User user) {
+        this.title = requestReviewDTO.getTitle();
+        this.description = requestReviewDTO.getDescription();
+        this.rating = requestReviewDTO.getRating();
+        this.createdAt = LocalDateTime.now();
+        this.likes = 0;
+        this.reviewedProduct = product;
+        this.reviewer = user;
+    }
 }

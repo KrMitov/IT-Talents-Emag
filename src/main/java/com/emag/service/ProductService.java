@@ -60,16 +60,17 @@ public class ProductService {
         if (requestProductDTO.getModel() == null || requestProductDTO.getModel().trim().equals("")){
             throw new BadRequestException("Invalid model name");
         }
-        if (requestProductDTO.getRegularPrice() <= 0){
+        if (requestProductDTO.getRegularPrice() == null || requestProductDTO.getRegularPrice() <= 0){
             throw new BadRequestException("Invalid regular price for product");
         }
-        if (requestProductDTO.getDiscountedPrice() != null && requestProductDTO.getDiscountedPrice() <= 0){
+        if (requestProductDTO.getDiscountedPrice() != null && (requestProductDTO.getDiscountedPrice() <= 0
+                || requestProductDTO.getDiscountedPrice() >= requestProductDTO.getRegularPrice())){
             throw new BadRequestException("Invalid discounted price for product");
         }
         if (requestProductDTO.getDescription() != null && requestProductDTO.getDescription().trim().equals("")){
             requestProductDTO.setDescription(null);
         }
-        if (requestProductDTO.getQuantity() <= 0){
+        if (requestProductDTO.getQuantity() == null || requestProductDTO.getQuantity() <= 0){
             throw new BadRequestException("Invalid product quantity");
         }
         if (requestProductDTO.getWarrantyYears() != null && requestProductDTO.getWarrantyYears() < 0){
@@ -89,7 +90,7 @@ public class ProductService {
     }
 
     //TODO move to util class
-    private Product getProductIfExists(int id){
+    public Product getProductIfExists(int id){
         Product product = productRepository.findById(id).orElse(null);
         if (product == null){
             throw new BadRequestException("The product does not exist");
