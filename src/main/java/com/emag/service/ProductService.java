@@ -8,6 +8,7 @@ import com.emag.model.dto.reviewdto.ReviewDTO;
 import com.emag.model.pojo.Product;
 import com.emag.model.pojo.User;
 import com.emag.service.validatorservice.ProductValidator;
+import com.emag.util.ProductUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -26,28 +27,15 @@ public class ProductService extends AbstractService{
     @Autowired
     private ProductDAO productDAO;
 
-    //TODO move to util class
-    private RequestProductDTO trimProductInputData(RequestProductDTO requestProductDTO){
-        requestProductDTO.setFullName(requestProductDTO.getFullName().trim());
-        requestProductDTO.setBrand(requestProductDTO.getBrand().trim());
-        requestProductDTO.setModel(requestProductDTO.getModel().trim());
-        if (requestProductDTO.getDescription() != null) {
-            requestProductDTO.setDescription(requestProductDTO.getDescription().trim());
-        }
-        return requestProductDTO;
-    }
-
     public ProductDTO addProduct(RequestProductDTO requestProductDTO) {
         ProductValidator.validateProductInputData(requestProductDTO);
-        requestProductDTO = trimProductInputData(requestProductDTO);
+        requestProductDTO = ProductUtility.trimProductInputData(requestProductDTO);
         Product product = new Product(requestProductDTO);
         product.setCategory(getCategoryIfExists(requestProductDTO.getCategoryId()));
         return new ProductDTO(productRepository.save(product));
     }
 
-    //move to util class?
-    //better method name?
-    private Product setProductChanges(Product product, RequestProductDTO requestProductDTO){
+    private Product validateAndSetProductChanges(Product product, RequestProductDTO requestProductDTO){
         String fullName = requestProductDTO.getFullName();
         if (fullName != null && !fullName.trim().equals("")){
             product.setFullName(fullName.trim());
@@ -60,13 +48,23 @@ public class ProductService extends AbstractService{
         if (model != null && !model.trim().equals("")){
             product.setModel(model.trim());
         }
-        Double regularPrice = requestProductDTO.getRegularPrice();
-        if (regularPrice != null && regularPrice > 0){
-            product.setRegularPrice(regularPrice);
+//        TODO validate regular price is not lower than discounted price
+//        boolean priceExceptionFlag = false;
+//        if (priceExceptionFlag){
+//            throw new BadRequestException("Discounted price should be lower than regular price");
+//        }
+        boolean priceEmailAlert = false;
+        Double newRegularPrice = requestProductDTO.getRegularPrice();
+        if (newRegularPrice != null && newRegularPrice > 0){
+            if (newRegularPrice < product.getRegularPrice()) {
+                priceEmailAlert = true;
+            }
+            product.setRegularPrice(newRegularPrice);
         }
-        Double discountedPrice = requestProductDTO.getDiscountedPrice();
-        if (discountedPrice != null && discountedPrice > 0){
-            product.setDiscountedPrice(discountedPrice);
+        Double newDiscountedPrice = requestProductDTO.getDiscountedPrice();
+        if (newDiscountedPrice != null && newDiscountedPrice > 0){
+            priceEmailAlert = newDiscountedPrice < product.getDiscountedPrice();
+            product.setDiscountedPrice(newDiscountedPrice);
         }
         String description = requestProductDTO.getDescription();
         if (description != null && !description.trim().equals("")){
@@ -85,12 +83,15 @@ public class ProductService extends AbstractService{
         if (categoryId != null) {
             product.setCategory(getCategoryIfExists(categoryId));
         }
+        if (priceEmailAlert) {
+            //TODO sendEmail(product.getId());
+        }
         return product;
     }
 
     public ProductDTO editProduct(int id, RequestProductDTO requestProductDTO){
         Product editedProduct = getProductIfExists(id);
-        editedProduct = setProductChanges(editedProduct, requestProductDTO);
+        editedProduct = validateAndSetProductChanges(editedProduct, requestProductDTO);
         return new ProductDTO(productRepository.save(editedProduct));
     }
 
@@ -202,9 +203,9 @@ public class ProductService extends AbstractService{
     }
 
 
-    public LikedProductsForUserDTO makeProductFavourite(FavouriteProductDTO favouriteProductDTO) {
-        User user =  getUserIfExists(favouriteProductDTO.getUserId());
-        Product product = getProductIfExists(favouriteProductDTO.getProductId());
+    public LikedProductsForUserDTO makeProductFavourite(int productId, int userId) {
+        User user =  getUserIfExists(userId);
+        Product product = getProductIfExists(productId);
         List<Product> likedProducts = user.getLikedProducts();
         if (likedProducts.contains(product)){
             throw new BadRequestException("User has already liked this product");
@@ -214,9 +215,9 @@ public class ProductService extends AbstractService{
         return new LikedProductsForUserDTO(userRepository.save(user));
     }
 
-    public LikedProductsForUserDTO removeFavouriteProduct(FavouriteProductDTO favouriteProductDTO) {
-        User user =  getUserIfExists(favouriteProductDTO.getUserId());
-        Product product = getProductIfExists(favouriteProductDTO.getProductId());
+    public LikedProductsForUserDTO removeFavouriteProduct(int productId, int userId) {
+        User user =  getUserIfExists(userId);
+        Product product = getProductIfExists(productId);
         List<Product> likedProducts = user.getLikedProducts();
         if (!likedProducts.contains(product)){
             throw new BadRequestException("User does not like this product");

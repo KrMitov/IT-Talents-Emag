@@ -51,14 +51,14 @@ public class ProductController extends AbstractController{
         return productService.filterProducts(filterProductsDTO);
     }
 
-    @PostMapping("/products/favourite")
-    public LikedProductsForUserDTO makeProductFavourite(@RequestBody FavouriteProductDTO favouriteProductDTO){
-        return productService.makeProductFavourite(favouriteProductDTO);
+    @PostMapping("/products/{id}/favourite")
+    public LikedProductsForUserDTO makeProductFavourite(@PathVariable("id") int productId, HttpSession session){
+        return productService.makeProductFavourite(productId, sessionManager.getLoggedUser(session).getId());
     }
 
-    @DeleteMapping("/products/favourite")
-    public LikedProductsForUserDTO removeFavouriteProduct(@RequestBody FavouriteProductDTO favouriteProductDTO){
-        return productService.removeFavouriteProduct(favouriteProductDTO);
+    @DeleteMapping("/products/{id}/favourite")
+    public LikedProductsForUserDTO removeFavouriteProduct(@PathVariable("id") int productId, HttpSession session){
+        return productService.removeFavouriteProduct(productId, sessionManager.getLoggedUser(session).getId());
     }
 
     @GetMapping("/products/{id}/reviews")

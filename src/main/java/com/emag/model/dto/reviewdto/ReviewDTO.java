@@ -14,6 +14,7 @@ import java.time.LocalDateTime;
 @Setter
 public class ReviewDTO {
 
+    private int reviewId;
     private String title;
     private String description;
     private int rating;
@@ -22,10 +23,11 @@ public class ReviewDTO {
     private String reviewerName;
 
     public ReviewDTO(Review review) {
+        this.reviewId = review.getId();
         this.title = review.getTitle();
         this.description = review.getDescription();
         this.rating = review.getRating();
-        this.likes = review.getLikes();
+        this.likes = review.getUsersLikedThisReview().size();
         this.createdAt = review.getCreatedAt();
         this.reviewerName = review.getReviewer().getName();
     }

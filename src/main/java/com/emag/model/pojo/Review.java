@@ -9,6 +9,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @AllArgsConstructor
@@ -26,7 +27,6 @@ public class Review {
     private String description;
     private int rating;
     private LocalDateTime createdAt;
-    private int likes;
     @ManyToOne
     @JoinColumn(name = "product_id")
     private Product reviewedProduct;
@@ -42,8 +42,8 @@ public class Review {
         this.description = requestReviewDTO.getDescription();
         this.rating = requestReviewDTO.getRating();
         this.createdAt = LocalDateTime.now();
-        this.likes = 0;
         this.reviewedProduct = product;
         this.reviewer = user;
+        this.usersLikedThisReview = new ArrayList<>();
     }
 }
