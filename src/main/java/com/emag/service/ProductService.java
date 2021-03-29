@@ -8,6 +8,7 @@ import com.emag.model.dto.reviewdto.ReviewDTO;
 import com.emag.model.pojo.Product;
 import com.emag.model.pojo.User;
 import com.emag.service.validatorservice.ProductValidator;
+import com.emag.util.EmailService;
 import com.emag.util.ProductUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,8 @@ public class ProductService extends AbstractService{
 
     @Autowired
     private ProductDAO productDAO;
+    @Autowired
+    private EmailService emailService;
 
     public ProductDTO addProduct(RequestProductDTO requestProductDTO) {
         ProductValidator.validateProductInputData(requestProductDTO);
@@ -84,7 +87,7 @@ public class ProductService extends AbstractService{
             product.setCategory(getCategoryIfExists(categoryId));
         }
         if (priceEmailAlert) {
-            //TODO sendEmail(product.getId());
+            emailService.sendMessage(product);
         }
         return product;
     }
