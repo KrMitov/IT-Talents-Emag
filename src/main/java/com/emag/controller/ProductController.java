@@ -1,11 +1,7 @@
 package com.emag.controller;
 
-
-import com.emag.model.dto.produtcdto.FavouriteProductDTO;
-import com.emag.model.dto.produtcdto.FilterProductsDTO;
-import com.emag.model.dto.produtcdto.ProductDTO;
-import com.emag.model.dto.produtcdto.RequestProductDTO;
-import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
+import com.emag.model.dto.produtcdto.*;
+import com.emag.model.dto.reviewdto.ReviewDTO;
 import com.emag.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -56,12 +52,17 @@ public class ProductController extends AbstractController{
     }
 
     @PostMapping("/products/favourite")
-    public UserWithoutPasswordDTO makeProductFavourite(@RequestBody FavouriteProductDTO favouriteProductDTO){
+    public LikedProductsForUserDTO makeProductFavourite(@RequestBody FavouriteProductDTO favouriteProductDTO){
         return productService.makeProductFavourite(favouriteProductDTO);
     }
 
     @DeleteMapping("/products/favourite")
-    public UserWithoutPasswordDTO removeFavouriteProduct(@RequestBody FavouriteProductDTO favouriteProductDTO){
+    public LikedProductsForUserDTO removeFavouriteProduct(@RequestBody FavouriteProductDTO favouriteProductDTO){
         return productService.removeFavouriteProduct(favouriteProductDTO);
+    }
+
+    @GetMapping("/products/{id}/reviews")
+    public List<ReviewDTO> getAllReviewsForProduct(@PathVariable int id){
+        return productService.getAllReviewsForProduct(id);
     }
 }

@@ -49,7 +49,6 @@ import java.util.List;
             name="users_like_products",
                     joinColumns = {@JoinColumn(name="user_id")},
             inverseJoinColumns = {@JoinColumn(name="product_id")}
-
         )
         private List<Product> likedProducts;
         @OneToMany(mappedBy = "reviewer")
@@ -60,10 +59,17 @@ import java.util.List;
         @JoinColumn(name = "image_id")
         @JsonManagedReference
         private UserImage image;
-        @OneToMany(mappedBy = "userHasOrder")
-        private List<Order> orders;
+        @ManyToMany
+        @JsonManagedReference
+        @JoinTable(
+                name="users_like_reviews",
+                joinColumns = {@JoinColumn(name="user_id")},
+                inverseJoinColumns = {@JoinColumn(name="review_id")}
+        )
+        private List<Review> likedReviews;
 
-        public User(RegisterRequestUserDTO registerRequestUserDTO){
+
+           public User(RegisterRequestUserDTO registerRequestUserDTO){
             this.email = registerRequestUserDTO.getEmail();
             this.password = registerRequestUserDTO.getPassword();
             this.name = registerRequestUserDTO.getName();
