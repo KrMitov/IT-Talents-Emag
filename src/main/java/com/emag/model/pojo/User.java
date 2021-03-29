@@ -67,7 +67,8 @@ import java.util.List;
                 inverseJoinColumns = {@JoinColumn(name="review_id")}
         )
         private List<Review> likedReviews;
-
+       @OneToMany(mappedBy = "userHasOrder")
+       private List<Order> orders;
 
            public User(RegisterRequestUserDTO registerRequestUserDTO){
             this.email = registerRequestUserDTO.getEmail();
