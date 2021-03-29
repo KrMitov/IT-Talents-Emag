@@ -3,11 +3,8 @@ package com.emag.service;
 import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
 import com.emag.model.dao.ProductDAO;
-import com.emag.model.dto.produtcdto.FavouriteProductDTO;
-import com.emag.model.dto.produtcdto.FilterProductsDTO;
-import com.emag.model.dto.produtcdto.ProductDTO;
-import com.emag.model.dto.produtcdto.RequestProductDTO;
-import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
+import com.emag.model.dto.produtcdto.*;
+import com.emag.model.dto.reviewdto.ReviewDTO;
 import com.emag.model.pojo.Product;
 import com.emag.model.pojo.User;
 import com.emag.service.validatorservice.ProductValidator;
@@ -205,7 +202,7 @@ public class ProductService extends AbstractService{
     }
 
 
-    public UserWithoutPasswordDTO makeProductFavourite(FavouriteProductDTO favouriteProductDTO) {
+    public LikedProductsForUserDTO makeProductFavourite(FavouriteProductDTO favouriteProductDTO) {
         User user =  getUserIfExists(favouriteProductDTO.getUserId());
         Product product = getProductIfExists(favouriteProductDTO.getProductId());
         List<Product> likedProducts = user.getLikedProducts();
@@ -214,10 +211,10 @@ public class ProductService extends AbstractService{
         }
         likedProducts.add(product);
         user.setLikedProducts(likedProducts);
-        return new UserWithoutPasswordDTO(userRepository.save(user));
+        return new LikedProductsForUserDTO(userRepository.save(user));
     }
 
-    public UserWithoutPasswordDTO removeFavouriteProduct(FavouriteProductDTO favouriteProductDTO) {
+    public LikedProductsForUserDTO removeFavouriteProduct(FavouriteProductDTO favouriteProductDTO) {
         User user =  getUserIfExists(favouriteProductDTO.getUserId());
         Product product = getProductIfExists(favouriteProductDTO.getProductId());
         List<Product> likedProducts = user.getLikedProducts();
@@ -226,6 +223,15 @@ public class ProductService extends AbstractService{
         }
         likedProducts.remove(product);
         user.setLikedProducts(likedProducts);
-        return new UserWithoutPasswordDTO(userRepository.save(user));
+        return new LikedProductsForUserDTO(userRepository.save(user));
+    }
+
+    public List<ReviewDTO> getAllReviewsForProduct(int id) {
+        List<ReviewDTO> reviews = new ArrayList<>();
+        getProductIfExists(id).getReviews().forEach(review -> reviews.add(new ReviewDTO(review)));
+        if (reviews.isEmpty()) {
+            throw new NotFoundException("No reviews for this product");
+        }
+        return reviews;
     }
 }

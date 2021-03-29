@@ -10,6 +10,7 @@ import com.emag.service.validatorservice.ReviewValidator;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.util.List;
 
 @Service
 @Transactional
@@ -42,10 +43,15 @@ public class ReviewService extends AbstractService{
     public ReviewDTO likeReview(int reviewId, int userId) {
         Review review = getReviewIfExists(reviewId);
         User user = getUserIfExists(userId);
-//        if (user.getLikedReviews().contains(review)){
-//            throw new BadRequestException("You have already liked this product");
-//        }
-        //TODO users_like_reviews M:M
-        return null;
+        if (review.getReviewer().getId() == userId){
+            throw new BadRequestException("You cannot like your own review");
+        }
+        List<Review> likedReviews = user.getLikedReviews();
+        if (likedReviews.contains(review)){
+            throw new BadRequestException("You have already liked this review");
+        }
+        likedReviews.add(review);
+        user.setLikedReviews(likedReviews);
+        return new ReviewDTO(review);
     }
 }

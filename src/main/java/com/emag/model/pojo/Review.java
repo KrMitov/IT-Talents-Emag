@@ -1,6 +1,7 @@
 package com.emag.model.pojo;
 
 import com.emag.model.dto.reviewdto.RequestReviewDTO;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,6 +33,9 @@ public class Review {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User reviewer;
+    @ManyToMany(mappedBy = "likedReviews")
+    @JsonBackReference
+    private List<User> usersLikedThisReview;
 
     public Review(RequestReviewDTO requestReviewDTO, Product product, User user) {
         this.title = requestReviewDTO.getTitle();
