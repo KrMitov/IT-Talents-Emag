@@ -1,4 +1,4 @@
-package com.emag.model.dto;
+package com.emag.model.dto.userdto;
 
 import com.emag.model.dto.addressdto.AddressDTO;
 import lombok.Getter;

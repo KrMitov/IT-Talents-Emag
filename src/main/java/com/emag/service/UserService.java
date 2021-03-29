@@ -2,11 +2,13 @@ package com.emag.service;
 
 import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
-import com.emag.model.dto.*;
 import com.emag.model.dto.produtcdto.LikedProductsForUserDTO;
 import com.emag.model.dto.produtcdto.ProductsFromCartForUserDTO;
+import com.emag.model.dto.produtcdto.UserOrdersDTO;
 import com.emag.model.dto.registerdto.RegisterRequestUserDTO;
 import com.emag.model.dto.registerdto.RegisterResponseUserDTO;
+import com.emag.model.dto.userdto.EditProfileRequestDTO;
+import com.emag.model.dto.userdto.LoginRequestUserDTO;
 import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
 import com.emag.model.pojo.*;
 import com.emag.model.repository.*;
@@ -189,5 +191,14 @@ public class UserService {
       File physicalFile = new File(imageUrl);
       return Files.readAllBytes(physicalFile.toPath());
   }
+
+   public UserOrdersDTO getOrders(int userId){
+       Optional<User> userFomDb = userRepository.findById(userId);
+       if(userFomDb.isEmpty()){
+           throw new NotFoundException("User not found");
+       }
+       User user = userFomDb.get();
+       return new UserOrdersDTO(user);
+   }
 
 }

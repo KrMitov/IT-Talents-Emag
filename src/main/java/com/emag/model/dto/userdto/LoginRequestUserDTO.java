@@ -1,4 +1,4 @@
-package com.emag.model.dto;
+package com.emag.model.dto.userdto;
 
 import lombok.Getter;
 import lombok.Setter;

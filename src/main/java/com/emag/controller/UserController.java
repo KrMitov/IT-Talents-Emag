@@ -1,10 +1,12 @@
 package com.emag.controller;
 
-import com.emag.model.dto.*;
 import com.emag.model.dto.produtcdto.LikedProductsForUserDTO;
 import com.emag.model.dto.produtcdto.ProductsFromCartForUserDTO;
+import com.emag.model.dto.produtcdto.UserOrdersDTO;
 import com.emag.model.dto.registerdto.RegisterRequestUserDTO;
 import com.emag.model.dto.registerdto.RegisterResponseUserDTO;
+import com.emag.model.dto.userdto.EditProfileRequestDTO;
+import com.emag.model.dto.userdto.LoginRequestUserDTO;
 import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
 import com.emag.model.pojo.UserImage;
 import com.emag.service.UserService;
@@ -12,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.mail.Multipart;
 import javax.naming.AuthenticationException;
 import javax.servlet.http.HttpSession;
 import java.io.IOException;
@@ -52,7 +53,7 @@ public class UserController extends AbstractController{
     }
 
     @PutMapping("/users/{id}")
-    public UserWithoutPasswordDTO editUser(@PathVariable int id, @RequestBody EditProfileRequestDTO dto,HttpSession session) throws ParseException {
+    public UserWithoutPasswordDTO editUser(@PathVariable int id, @RequestBody EditProfileRequestDTO dto, HttpSession session) throws ParseException {
           sessionManager.getLoggedUser(session);
           return userService.editUser(id,dto);
     }
@@ -77,6 +78,12 @@ public class UserController extends AbstractController{
     public byte[] downloadUserImage(@PathVariable int id,HttpSession session) throws IOException {
         sessionManager.getLoggedUser(session);
         return userService.downloadImage(id);
+   }
+
+   @GetMapping("/users/{id}/orders")
+   public UserOrdersDTO getOrdersForUser(@PathVariable int id,HttpSession session){
+        sessionManager.getLoggedUser(session);
+         return userService.getOrders(id);
    }
 
 }

@@ -27,8 +27,6 @@ import java.util.List;
         private String email;
         private String password;
         private String name;
-        //    @OneToMany(mappedBy = "user")
-//    @JsonManagedReference
         @ManyToMany
         @JsonManagedReference
         @JoinTable(
@@ -62,6 +60,8 @@ import java.util.List;
         @JoinColumn(name = "image_id")
         @JsonManagedReference
         private UserImage image;
+        @OneToMany(mappedBy = "userHasOrder")
+        private List<Order> orders;
 
         public User(RegisterRequestUserDTO registerRequestUserDTO){
             this.email = registerRequestUserDTO.getEmail();
