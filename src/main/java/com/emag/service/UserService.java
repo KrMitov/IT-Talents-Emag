@@ -24,6 +24,8 @@ import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class UserService {
@@ -42,15 +44,25 @@ public class UserService {
 
   public RegisterResponseUserDTO register(RegisterRequestUserDTO dto){
       String email = dto.getEmail();
+      if(!emailIsValid(email)){
+          throw new BadRequestException("Incorrect email");
+      }
       User userByEmail = userRepository.findByEmail(email);
       if(userByEmail!=null){
-          throw new BadRequestException("email already exists");
+          throw new BadRequestException("Email already exists!");
       }
-      Optional<Role> roleFromDb = roleRepository.findById(1);
+      Optional<Role> roleFromDb = roleRepository.findById(USER_ROLE_ID);
+      if(!passwordsMatch(dto)){
+          throw new BadRequestException("Passwords do not match!");
+      }
       Role role = roleFromDb.get() ;
       RegisterResponseUserDTO response;
       PasswordEncoder encoder = new BCryptPasswordEncoder();
-      dto.setPassword(encoder.encode(dto.getPassword()));
+      String password = dto.getPassword();
+      if(!passwordIsValid(password)){
+          throw new BadRequestException("Password is too weak!");
+      }
+      dto.setPassword(encoder.encode(password));
       User user = new User(dto);
       user.setRole(role);
       user = userRepository.save(user);
@@ -63,12 +75,12 @@ public class UserService {
       String password = dto.getPassword();
       User userFromDb = userRepository.findByEmail(email);
       if(userFromDb == null){
-      throw new NotFoundException("wrong email or password");
+      throw new NotFoundException("Wrong email or password!");
       }
       String passwordFromDb = userFromDb.getPassword();
       PasswordEncoder encoder = new BCryptPasswordEncoder();
       if(!encoder.matches(password,passwordFromDb)){
-          throw new NotFoundException("wrong email or password");
+          throw new NotFoundException("Wrong email or password!");
       }
      return  new UserWithoutPasswordDTO(userFromDb);
   }
@@ -76,7 +88,7 @@ public class UserService {
   public UserWithoutPasswordDTO findById(int id){
       Optional<User> userFromDb = userRepository.findById(id);
       if(userFromDb.isEmpty()){
-          throw new NotFoundException("User does not exist");
+          throw new NotFoundException("User does not exist!");
       }
       UserWithoutPasswordDTO dto = new UserWithoutPasswordDTO(userFromDb.get());
       return dto;
@@ -85,7 +97,7 @@ public class UserService {
   public UserWithoutPasswordDTO editUser(int id, EditProfileRequestDTO dto) {
       Optional<User> userFromDb = userRepository.findById(id);
       if(userFromDb.isEmpty()){
-          throw new NotFoundException("user not found");
+          throw new NotFoundException("User not found!");
       }else{
           User user = userFromDb.get();
           if(dto.getOldPassword().length()>5){
@@ -98,19 +110,19 @@ public class UserService {
                       user.setPassword(encoder.encode(newPassword));
                       user = userRepository.save(user);
                   }else{
-                      throw new BadRequestException("new passwords do not match");
+                      throw new BadRequestException("New passwords do not match!");
                   }
               }else{
-                  throw new BadRequestException("wrong password");
+                  throw new BadRequestException("Wrong password!");
               }
           }
           if(dto.getPhoneNumber().length()>0){
-              if(dto.getPhoneNumber().length()==10) {
+              if(dto.getPhoneNumber().length()==10){
                   String phoneNumber = dto.getPhoneNumber();
                   user.setPhoneNumber(phoneNumber);
                   user = userRepository.save(user);
               }else{
-                  throw new BadRequestException("wrong phone number");
+                  throw new BadRequestException("Wrong phone number!");
               }
           }
           if(dto.getBirthDate().length()==10){
@@ -199,6 +211,49 @@ public class UserService {
        }
        User user = userFomDb.get();
        return new UserOrdersDTO(user);
+   }
+
+   private boolean emailIsValid(String email){
+       boolean result = false;
+       String specialCharacters = "#?!@$%^&*-:'{}+_()<>|[]";
+       //letters and numbers and "_","." before "@" symbol
+       String regex = "^[A-Za-z0-9+_.]+@(.+)$";
+       if(email.matches(regex)){
+           int startCharacter = 0;
+           for (int i = 0; i < email.length(); i++) {
+               if(email.charAt(i) == '@'){
+                   startCharacter = i;
+               }
+           }
+           for (int i = startCharacter+1; i <email.length() ; i++) {
+               char character = email.charAt(i);
+               if(!specialCharacters.contains(String.valueOf(character)) || !Character.isDigit(character)) {
+                   result = true;
+               }else{
+                   result = false;
+                   break;
+               }
+           }
+       }
+       return result;
+   }
+
+   private boolean passwordIsValid(String password){
+      boolean result = false;
+      //At least one upper case, one lower case,one digit,one specail character minimum eight
+      String regex = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$";
+      if(password.matches(regex)){
+          result = true;
+      }
+      return  result;
+   }
+
+   private boolean passwordsMatch(RegisterRequestUserDTO dto){
+      if(dto.getPassword().equals(dto.getConfirmPassword())){
+          return  true;
+      }else {
+          return false;
+      }
    }
 
 }

@@ -31,6 +31,9 @@ public class Category {
     @OneToMany(mappedBy = "category")
     @JsonBackReference
     private List<Product> products;
+    @OneToMany
+    @JsonBackReference
+    private List<Coupon> coupons;
 
     public List<Product> getProducts() {
         List<Product> availableProducts = new ArrayList<>();

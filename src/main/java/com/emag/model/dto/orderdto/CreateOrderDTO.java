@@ -10,4 +10,5 @@ import lombok.Setter;
 public class CreateOrderDTO {
     private int[] productsId;
     private int userId;
+    private CouponDTO coupon;
 }
