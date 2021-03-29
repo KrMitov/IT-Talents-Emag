@@ -1,8 +1,6 @@
 package com.emag.controller;
 
-import com.emag.model.dto.categorydto.RequestCategoryDTO;
-import com.emag.model.dto.categorydto.CategoryAndSubcategoriesDTO;
-import com.emag.model.dto.categorydto.CategoryDTO;
+import com.emag.model.dto.categorydto.*;
 import com.emag.model.dto.produtcdto.ProductDTO;
 import com.emag.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,5 +43,19 @@ public class CategoryController extends AbstractController{
     @GetMapping("/category")
     public List<CategoryAndSubcategoriesDTO> getAllCategories(){
         return categoryService.getAllCategories();
+    }
+
+    @PostMapping("/category/discount")
+    public List<CategoryDTO> addDiscountForCategory(
+            @RequestBody AddDiscountCategoryDTO addDiscountCategoryDTO, HttpSession session){
+        sessionManager.adminVerification(session);
+        return categoryService.addDiscountForCategory(addDiscountCategoryDTO);
+    }
+
+    @DeleteMapping("/category/discount")
+    public List<CategoryDTO> removeDiscountForCategory(
+            @RequestBody RemoveDiscountCategoryDTO RemoveDiscountCategoryDTO, HttpSession session){
+        sessionManager.adminVerification(session);
+        return categoryService.removeDiscountForCategory(RemoveDiscountCategoryDTO);
     }
 }

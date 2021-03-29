@@ -2,9 +2,7 @@ package com.emag.service;
 
 import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
-import com.emag.model.dto.categorydto.RequestCategoryDTO;
-import com.emag.model.dto.categorydto.CategoryAndSubcategoriesDTO;
-import com.emag.model.dto.categorydto.CategoryDTO;
+import com.emag.model.dto.categorydto.*;
 import com.emag.model.dto.produtcdto.ProductDTO;
 import com.emag.model.pojo.Category;
 import com.emag.model.pojo.Product;
@@ -69,5 +67,40 @@ public class CategoryService extends AbstractService{
         }
         categoriesWithoutParent.forEach(category -> categories.add(new CategoryAndSubcategoriesDTO(category)));
         return categories;
+    }
+
+    public List<CategoryDTO> addDiscountForCategory(AddDiscountCategoryDTO addDiscountCategoryDTO) {
+        if (addDiscountCategoryDTO.getCategoryIds() == null){
+            throw new BadRequestException("Invalid category input");
+        }
+        Integer discountPercent = addDiscountCategoryDTO.getDiscountPercent();
+        if (discountPercent == null || discountPercent <= 0 || discountPercent >= 100){
+            throw new BadRequestException("Invalid discount percent");
+        }
+        double discountCoef = discountPercent.doubleValue() / 100;
+        List<Category> categories = new ArrayList<>();
+        addDiscountCategoryDTO.getCategoryIds().forEach(id -> categories.add(getCategoryIfExists(id)));
+        List<Product> products = new ArrayList<>();
+        categories.forEach(category -> products.addAll(category.getProducts()));
+        products.forEach(product -> product.setDiscountedPrice(product.getRegularPrice() - (product.getRegularPrice() * discountCoef)));
+        productRepository.saveAll(products);
+        List<CategoryDTO> categoryDTOList = new ArrayList<>();
+        categories.forEach(category -> categoryDTOList.add(new CategoryDTO(category)));
+        return categoryDTOList;
+    }
+
+    public List<CategoryDTO> removeDiscountForCategory(RemoveDiscountCategoryDTO removeDiscountCategoryDTO) {
+        if (removeDiscountCategoryDTO.getCategoryIds() == null){
+            throw new BadRequestException("Invalid category input");
+        }
+        List<Category> categories = new ArrayList<>();
+        removeDiscountCategoryDTO.getCategoryIds().forEach(id -> categories.add(getCategoryIfExists(id)));
+        List<Product> products = new ArrayList<>();
+        categories.forEach(category -> products.addAll(category.getProducts()));
+        products.forEach(product -> product.setDiscountedPrice(null));
+        productRepository.saveAll(products);
+        List<CategoryDTO> categoryDTOList = new ArrayList<>();
+        categories.forEach(category -> categoryDTOList.add(new CategoryDTO(category)));
+        return categoryDTOList;
     }
 }
