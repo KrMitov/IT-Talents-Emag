@@ -58,6 +58,10 @@ import java.util.List;
         private List<Review> reviews;
         @OneToMany(mappedBy = "user")
         private List<UserCart> productsInCart;
+        @OneToOne
+        @JoinColumn(name = "image_id")
+        @JsonManagedReference
+        private UserImage image;
 
         public User(RegisterRequestUserDTO registerRequestUserDTO){
             this.email = registerRequestUserDTO.getEmail();

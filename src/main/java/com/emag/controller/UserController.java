@@ -6,12 +6,16 @@ import com.emag.model.dto.produtcdto.ProductsFromCartForUserDTO;
 import com.emag.model.dto.registerdto.RegisterRequestUserDTO;
 import com.emag.model.dto.registerdto.RegisterResponseUserDTO;
 import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
+import com.emag.model.pojo.UserImage;
 import com.emag.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.mail.Multipart;
 import javax.naming.AuthenticationException;
 import javax.servlet.http.HttpSession;
+import java.io.IOException;
 import java.text.ParseException;
 
 @RestController
@@ -64,6 +68,15 @@ public class UserController extends AbstractController{
         sessionManager.getLoggedUser(session);
          return userService.getProductsFromCart(id);
     }
-
+   @PutMapping("/users/{id}/image")
+    public UserImage uploadImage(@RequestPart MultipartFile file, @PathVariable int id,HttpSession session) throws IOException {
+       sessionManager.getLoggedUser(session);
+        return userService.uploadImage(file,id);
+   }
+   @GetMapping(value = "/users/{id}/image",produces = "image/*")
+    public byte[] downloadUserImage(@PathVariable int id,HttpSession session) throws IOException {
+        sessionManager.getLoggedUser(session);
+        return userService.downloadImage(id);
+   }
 
 }

@@ -9,15 +9,16 @@ import com.emag.model.dto.registerdto.RegisterRequestUserDTO;
 import com.emag.model.dto.registerdto.RegisterResponseUserDTO;
 import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
 import com.emag.model.pojo.*;
-import com.emag.model.repository.AddressRepository;
-import com.emag.model.repository.ProductRepository;
-import com.emag.model.repository.RoleRepository;
-import com.emag.model.repository.UserRepository;
+import com.emag.model.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.*;
+import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +33,10 @@ public class UserService {
     RoleRepository roleRepository;
     @Autowired
     AddressRepository addressRepository;
+    @Autowired
+    UserImageRepository userImageRepository;
+    @Value("${file.path}")
+    private String filePath;
 
   public RegisterResponseUserDTO register(RegisterRequestUserDTO dto){
       String email = dto.getEmail();
@@ -150,6 +155,39 @@ public class UserService {
           }
       }
       return result;
+  }
+
+   public UserImage uploadImage(MultipartFile file,int userId) throws IOException {
+      if(file == null){
+          throw new BadRequestException("You have to select an image");
+      }
+      File physicalFile = new File(filePath+File.separator+System.nanoTime()+".png");
+      UserImage userImage = new UserImage();
+      OutputStream os = new FileOutputStream(physicalFile);
+      os.write(file.getBytes());
+      userImage.setUrl(physicalFile.getAbsolutePath());
+      Optional<User> userFromDb = userRepository.findById(userId);
+      User user = userFromDb.get();
+      userImage = userImageRepository.save(userImage);
+      user.setImage(userImage);
+      userRepository.save(user);
+      os.close();
+      return userImage;
+
+   }
+
+   public byte[] downloadImage(int userId) throws IOException {
+      Optional<User> userFromDb = userRepository.findById(userId);
+      if(userFromDb.isEmpty()){
+          throw new NotFoundException("User does not exist");
+      }
+      User user = userFromDb.get();
+      if(user.getImage() == null){
+          throw new NotFoundException("User does not have a profile picture");
+      }
+      String imageUrl = user.getImage().getUrl();
+      File physicalFile = new File(imageUrl);
+      return Files.readAllBytes(physicalFile.toPath());
   }
 
 }
