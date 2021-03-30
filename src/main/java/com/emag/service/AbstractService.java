@@ -4,6 +4,7 @@ import com.emag.exceptions.BadRequestException;
 import com.emag.model.pojo.*;
 import com.emag.model.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 
 public abstract class AbstractService {
 
@@ -17,6 +18,14 @@ public abstract class AbstractService {
     protected ReviewRepository reviewRepository;
     @Autowired
     protected ProductImageRepository productImageRepository;
+    @Autowired
+    protected RoleRepository roleRepository;
+    @Autowired
+    protected AddressRepository addressRepository;
+    @Autowired
+    protected UserImageRepository userImageRepository;
+    @Value("${file.path}")
+    protected String filePath;
 
     protected Product getProductIfExists(int id){
         Product product = productRepository.findById(id).orElse(null);
