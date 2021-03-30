@@ -21,7 +21,6 @@ public class Order {
     @Column(name = "user_id",insertable = false,updatable = false)
     private int userId;
     private Timestamp createdAt;
-//    private int couponId;
     @ManyToMany
     @JsonManagedReference
     @JoinTable(

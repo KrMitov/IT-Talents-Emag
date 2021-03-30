@@ -9,6 +9,7 @@ import com.emag.model.repository.CategoryRepository;
 import com.emag.model.repository.OrderRepository;
 import com.emag.model.repository.ProductRepository;
 import com.emag.model.repository.UserRepository;
+import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -101,11 +102,15 @@ public class OrderService {
     }
 
     private void checkCartForProduct(User user,Product product){
+        boolean isFound = false;
         List<UserCart> productsInCart = user.getProductsInCart();
         for (UserCart userCart : productsInCart) {
-            if(!userCart.getProduct().getFullName().equals(product.getFullName())){
-                throw new NotFoundException("Product not found in cart");
+            if(userCart.getProduct().getFullName().equals(product.getFullName())){
+                isFound = true;
             }
+        }
+        if(isFound == false) {
+            throw new NotFoundException("Product not found in cart");
         }
     }
 

@@ -9,6 +9,7 @@ import lombok.Setter;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -35,14 +36,13 @@ import java.util.List;
                 inverseJoinColumns = {@JoinColumn(name="address_id")}
         )
         private List<Address> addresses;
-        private String phoneNumber;
         @ManyToOne
         @JsonBackReference
         @JoinColumn(name="role_id")
         private Role role;
-        private Timestamp birthDate;
+        private Date birthDate;
         private Timestamp createdAt;
-        private String profile_picture;
+        private String phoneNumber;
         @ManyToMany
         @JsonManagedReference
         @JoinTable(

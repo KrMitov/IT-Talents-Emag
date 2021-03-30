@@ -7,6 +7,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,9 +16,11 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 public class OrderDTO {
+    private Timestamp createdAt;
     private List<ProductDTO> products;
 
     public OrderDTO(Order order){
+        this.createdAt = order.getCreatedAt();
         this.products = new ArrayList<>();
         for (Product product : order.getProductsInOrder()){
             ProductDTO dto = new ProductDTO(product);

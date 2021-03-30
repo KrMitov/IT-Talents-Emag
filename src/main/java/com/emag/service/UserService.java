@@ -1,5 +1,6 @@
 package com.emag.service;
 
+import com.emag.exceptions.AuthenticationException;
 import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
 import com.emag.model.dto.produtcdto.LikedProductsForUserDTO;
@@ -9,6 +10,7 @@ import com.emag.model.dto.registerdto.RegisterRequestUserDTO;
 import com.emag.model.dto.registerdto.RegisterResponseUserDTO;
 import com.emag.model.dto.userdto.EditProfileRequestDTO;
 import com.emag.model.dto.userdto.LoginRequestUserDTO;
+import com.emag.model.dto.userdto.UserReviewsDTO;
 import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
 import com.emag.model.pojo.*;
 import com.emag.model.repository.*;
@@ -19,10 +21,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpSession;
 import javax.transaction.Transactional;
 import java.io.*;
 import java.nio.file.Files;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Matcher;
@@ -52,10 +56,10 @@ public class UserService {
       if(userByEmail!=null){
           throw new BadRequestException("Email already exists!");
       }
-      Optional<Role> roleFromDb = roleRepository.findById(USER_ROLE_ID);
       if(!passwordsMatch(dto)){
           throw new BadRequestException("Passwords do not match!");
       }
+      Optional<Role> roleFromDb = roleRepository.findById(USER_ROLE_ID);
       Role role = roleFromDb.get() ;
       RegisterResponseUserDTO response;
       PasswordEncoder encoder = new BCryptPasswordEncoder();
@@ -63,6 +67,7 @@ public class UserService {
       if(!passwordIsValid(password)){
           throw new BadRequestException("Password is too weak!");
       }
+      this.validateName(dto.getName());
       dto.setPassword(encoder.encode(password));
       User user = new User(dto);
       user.setRole(role);
@@ -95,7 +100,8 @@ public class UserService {
       return dto;
   }
 
-  public UserWithoutPasswordDTO editUser(int id, EditProfileRequestDTO dto) {
+  public UserWithoutPasswordDTO editUser(int id, EditProfileRequestDTO dto,HttpSession session) {
+      this.verifyUserId(id,session,"You can not edit another user's profile!");
       Optional<User> userFromDb = userRepository.findById(id);
       if(userFromDb.isEmpty()){
           throw new NotFoundException("User not found!");
@@ -108,6 +114,7 @@ public class UserService {
                   String newPassword = dto.getNewPassword();
                   String confirmNewPassword = dto.getConfirmNewPassword();
                   if(newPassword.equals(confirmNewPassword)){
+                      this.passwordIsValid(newPassword);
                       user.setPassword(encoder.encode(newPassword));
                       user = userRepository.save(user);
                   }else{
@@ -118,19 +125,16 @@ public class UserService {
               }
           }
           if(dto.getPhoneNumber().length()>0){
-              if(dto.getPhoneNumber().length()==10){
                   String phoneNumber = dto.getPhoneNumber();
+                  this.validatePhoneNumber(phoneNumber);
                   user.setPhoneNumber(phoneNumber);
                   user = userRepository.save(user);
-              }else{
-                  throw new BadRequestException("Wrong phone number!");
-              }
           }
-          if(dto.getBirthDate().length()==10){
-              String dtoDate = dto.getBirthDate();
-//              DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MMM-dd");
-//              LocalDate date = LocalDate.parse(dtoDate,formatter);
-              user.setBirthDate(Timestamp.valueOf(dtoDate));
+
+          if(dto.getBirthDate()!=null) {
+              LocalDate birthDate = this.validateDate(dto.getBirthDate());
+              java.sql.Date sqlDate = java.sql.Date.valueOf( birthDate );
+              user.setBirthDate(sqlDate);
               user = userRepository.save(user);
           }
 
@@ -149,16 +153,28 @@ public class UserService {
       }
   }
 
-  public LikedProductsForUserDTO getLikedProducts(int userId){
+  public LikedProductsForUserDTO getLikedProducts(int userId,HttpSession session){
+      this.verifyUserId(userId,session,"You can not get liked products for another user!");
       Optional<User> userFromDb = userRepository.findById(userId);
       User user = userFromDb.get();
       return new LikedProductsForUserDTO(user);
   }
 
-  public ProductsFromCartForUserDTO getProductsFromCart(int id){
+  public ProductsFromCartForUserDTO getProductsFromCart(int id,HttpSession session){
+      this.verifyUserId(id,session,"You can not get products from cart for another user!");
       Optional<User> userFromDb = userRepository.findById(id);
       User user = userFromDb.get();
       return new ProductsFromCartForUserDTO(user);
+  }
+
+  public UserReviewsDTO getReviews(int userId,HttpSession session){
+      this.verifyUserId(userId,session,"You can not get reviews by  another user!");
+      Optional<User> userFromDb = userRepository.findById(userId);
+      if(userFromDb.isEmpty()){
+          throw new NotFoundException("user not found");
+      }
+      User user = userFromDb.get();
+      return new UserReviewsDTO(user);
   }
 
   private boolean containsAddress(Address address,User user){
@@ -206,7 +222,8 @@ public class UserService {
       return Files.readAllBytes(physicalFile.toPath());
   }
 
-   public UserOrdersDTO getOrders(int userId){
+   public UserOrdersDTO getOrders(int userId,HttpSession session){
+       this.verifyUserId(userId,session,"You can not get orders for another user!");
        Optional<User> userFomDb = userRepository.findById(userId);
        if(userFomDb.isEmpty()){
            throw new NotFoundException("User not found");
@@ -242,7 +259,7 @@ public class UserService {
 
    private boolean passwordIsValid(String password){
       boolean result = false;
-      //At least one upper case, one lower case,one digit,one specail character minimum eight
+      //At least one upper case, one lower case,one digit,one specail character minimum eight characters
       String regex = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$";
       if(password.matches(regex)){
           result = true;
@@ -255,6 +272,44 @@ public class UserService {
           return  true;
       }else {
           return false;
+      }
+   }
+    private void verifyUserId(int userId, HttpSession session,String message){
+        int loggedUserId = (int) session.getAttribute("LOGGED_USER_ID");
+        if(userId!=loggedUserId){
+            throw new AuthenticationException(message);
+        }
+    }
+
+    private void validatePhoneNumber(String phoneNumber){
+        if(phoneNumber.length()!=10) {
+            throw new BadRequestException("Wrong phone number");
+        }
+        for (int i = 0; i < phoneNumber.length(); i++) {
+               if(!Character.isDigit(phoneNumber.charAt(i))){
+                   throw new BadRequestException("Wrong phone number");
+               }
+        }
+    }
+
+    private LocalDate validateDate(Timestamp date){
+         LocalDate birthDate = date.toLocalDateTime().toLocalDate();
+         if(birthDate!=null){
+             return birthDate;
+         }else{
+             throw new BadRequestException("Wrong birth date");
+         }
+    }
+   private void validateName(String name){
+      if(name.length()<=3){
+          throw new BadRequestException("Enter correct name");
+      }else{
+          for (int i = 0; i < name.length(); i++) {
+              char character = name.charAt(i);
+              if(Character.isDigit(character)){
+                  throw new BadRequestException("Enter correct name");
+              }
+          }
       }
    }
 

@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Timestamp;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -13,6 +15,6 @@ public class EditProfileRequestDTO {
     private String newPassword;
     private String confirmNewPassword;
     private String phoneNumber;
-    private String birthDate;
+    private Timestamp birthDate;
     private AddressDTO address;
 }

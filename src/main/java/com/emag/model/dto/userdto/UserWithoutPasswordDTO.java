@@ -5,10 +5,12 @@ import com.emag.model.dto.roledto.RoleWithoutUsersDTO;
 import com.emag.model.pojo.Address;
 import com.emag.model.pojo.Product;
 import com.emag.model.pojo.User;
+import com.emag.model.pojo.UserImage;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,11 +25,11 @@ public class UserWithoutPasswordDTO {
     private String email;
     private String name;
     private List<Address> addresses;
-    private String phoneNumber;
     private RoleWithoutUsersDTO role;
-    private Timestamp birthdate;
+    private Date birthdate;
     private Timestamp createdAt;
-    private String profile_picture;
+    private UserImage profilePicture;
+    private String phoneNumber;
 
     public UserWithoutPasswordDTO(User user){
         this.id = user.getId();
@@ -41,7 +43,7 @@ public class UserWithoutPasswordDTO {
             this.birthdate = user.getBirthDate();
         }
         this.createdAt = user.getCreatedAt();
-        this.profile_picture = user.getProfile_picture();
+        this.profilePicture = user.getImage();
     }
 
 }

@@ -7,6 +7,7 @@ import com.emag.model.dto.registerdto.RegisterRequestUserDTO;
 import com.emag.model.dto.registerdto.RegisterResponseUserDTO;
 import com.emag.model.dto.userdto.EditProfileRequestDTO;
 import com.emag.model.dto.userdto.LoginRequestUserDTO;
+import com.emag.model.dto.userdto.UserReviewsDTO;
 import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
 import com.emag.model.pojo.UserImage;
 import com.emag.service.UserService;
@@ -55,19 +56,19 @@ public class UserController extends AbstractController{
     @PutMapping("/users/{id}")
     public UserWithoutPasswordDTO editUser(@PathVariable int id, @RequestBody EditProfileRequestDTO dto, HttpSession session) throws ParseException {
           sessionManager.getLoggedUser(session);
-          return userService.editUser(id,dto);
+          return userService.editUser(id,dto,session);
     }
 
     @GetMapping("/users/{id}/favourites")
     public LikedProductsForUserDTO getFavoriteProducts(@PathVariable int id,HttpSession session){
         sessionManager.getLoggedUser(session);
-        return userService.getLikedProducts(id);
+        return userService.getLikedProducts(id,session);
     }
 
     @GetMapping("/users/{id}/cart")
     public ProductsFromCartForUserDTO getProductsFromCart(@PathVariable int id,HttpSession session){
         sessionManager.getLoggedUser(session);
-         return userService.getProductsFromCart(id);
+         return userService.getProductsFromCart(id,session);
     }
    @PutMapping("/users/{id}/image")
     public UserImage uploadImage(@RequestPart MultipartFile file, @PathVariable int id,HttpSession session) throws IOException {
@@ -83,7 +84,13 @@ public class UserController extends AbstractController{
    @GetMapping("/users/{id}/orders")
    public UserOrdersDTO getOrdersForUser(@PathVariable int id,HttpSession session){
         sessionManager.getLoggedUser(session);
-         return userService.getOrders(id);
+         return userService.getOrders(id,session);
+   }
+
+   @GetMapping("/users/{id}/reviews")
+    public UserReviewsDTO getReviewsByUser(@PathVariable int id,HttpSession session){
+       sessionManager.getLoggedUser(session);
+       return userService.getReviews(id,session);
    }
 
 }
