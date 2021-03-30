@@ -3,6 +3,7 @@ package com.emag.model.dto.produtcdto;
 import com.emag.model.dto.categorydto.CategoryDTO;
 import com.emag.model.dto.reviewdto.ReviewDTO;
 import com.emag.model.pojo.Product;
+import com.emag.model.pojo.ProductImage;
 import com.emag.model.pojo.Review;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,6 +30,7 @@ public class ProductDTO {
     private Integer warrantyYears;
     private CategoryDTO category;
     private List<ReviewDTO> reviews;
+    private List<Integer> imagesIds;
 
     public ProductDTO(Product product) {
         this.id = product.getId();
@@ -43,5 +45,7 @@ public class ProductDTO {
         this.category = new CategoryDTO(product.getCategory());
         this.reviews = new ArrayList<>();
         product.getReviews().forEach(review -> reviews.add(new ReviewDTO(review)));
+        this.imagesIds = new ArrayList<>();
+        product.getProductImages().forEach(image -> imagesIds.add(image.getId()));
     }
 }

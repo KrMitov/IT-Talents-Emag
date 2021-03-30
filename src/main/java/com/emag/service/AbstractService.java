@@ -1,14 +1,8 @@
 package com.emag.service;
 
 import com.emag.exceptions.BadRequestException;
-import com.emag.model.pojo.Category;
-import com.emag.model.pojo.Product;
-import com.emag.model.pojo.Review;
-import com.emag.model.pojo.User;
-import com.emag.model.repository.CategoryRepository;
-import com.emag.model.repository.ProductRepository;
-import com.emag.model.repository.ReviewRepository;
-import com.emag.model.repository.UserRepository;
+import com.emag.model.pojo.*;
+import com.emag.model.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public abstract class AbstractService {
@@ -21,6 +15,8 @@ public abstract class AbstractService {
     protected CategoryRepository categoryRepository;
     @Autowired
     protected ReviewRepository reviewRepository;
+    @Autowired
+    protected ProductImageRepository productImageRepository;
 
     protected Product getProductIfExists(int id){
         Product product = productRepository.findById(id).orElse(null);
@@ -63,5 +59,13 @@ public abstract class AbstractService {
             throw new BadRequestException("The review does not exist");
         }
         return review;
+    }
+
+    protected ProductImage getProductImageIfExists(int id){
+        ProductImage productImage = productImageRepository.findById(id).orElse(null);
+        if (productImage == null){
+            throw new BadRequestException("Product image with id " + id + " does not exist");
+        }
+        return productImage;
     }
 }
