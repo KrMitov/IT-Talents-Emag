@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Getter
@@ -26,8 +27,8 @@ public class Coupon {
     @JsonManagedReference
     @JoinColumn(name = "category_id")
     private Category category;
-    private int startDate;
-    private int expireDate;
+    private Timestamp startDate;
+    private Timestamp expireDate;
     @OneToMany(mappedBy = "coupon")
     @JsonBackReference
     private List<Order> ordersHaveCoupon;
