@@ -1,6 +1,5 @@
 package com.emag.service;
 
-import com.emag.exceptions.AuthenticationException;
 import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
 import com.emag.model.dto.produtcdto.LikedProductsForUserDTO;
@@ -13,9 +12,6 @@ import com.emag.model.dto.userdto.LoginRequestUserDTO;
 import com.emag.model.dto.userdto.UserReviewsDTO;
 import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
 import com.emag.model.pojo.*;
-import com.emag.model.repository.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,23 +25,11 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
-public class UserService {
+public class UserService extends AbstractService{
 
     private static final int USER_ROLE_ID = 1;
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    RoleRepository roleRepository;
-    @Autowired
-    AddressRepository addressRepository;
-    @Autowired
-    UserImageRepository userImageRepository;
-    @Value("${file.path}")
-    private String filePath;
 
   public RegisterResponseUserDTO register(RegisterRequestUserDTO dto){
       String email = dto.getEmail();
@@ -100,8 +84,7 @@ public class UserService {
       return dto;
   }
 
-  public UserWithoutPasswordDTO editUser(int id, EditProfileRequestDTO dto,HttpSession session) {
-      this.verifyUserId(id,session,"You can not edit another user's profile!");
+  public UserWithoutPasswordDTO editUser(int id, EditProfileRequestDTO dto) {
       Optional<User> userFromDb = userRepository.findById(id);
       if(userFromDb.isEmpty()){
           throw new NotFoundException("User not found!");
@@ -153,22 +136,19 @@ public class UserService {
       }
   }
 
-  public LikedProductsForUserDTO getLikedProducts(int userId,HttpSession session){
-      this.verifyUserId(userId,session,"You can not get liked products for another user!");
+  public LikedProductsForUserDTO getLikedProducts(int userId){
       Optional<User> userFromDb = userRepository.findById(userId);
       User user = userFromDb.get();
       return new LikedProductsForUserDTO(user);
   }
 
-  public ProductsFromCartForUserDTO getProductsFromCart(int id,HttpSession session){
-      this.verifyUserId(id,session,"You can not get products from cart for another user!");
+  public ProductsFromCartForUserDTO getProductsFromCart(int id){
       Optional<User> userFromDb = userRepository.findById(id);
       User user = userFromDb.get();
       return new ProductsFromCartForUserDTO(user);
   }
 
   public UserReviewsDTO getReviews(int userId,HttpSession session){
-      this.verifyUserId(userId,session,"You can not get reviews by  another user!");
       Optional<User> userFromDb = userRepository.findById(userId);
       if(userFromDb.isEmpty()){
           throw new NotFoundException("user not found");
@@ -222,8 +202,7 @@ public class UserService {
       return Files.readAllBytes(physicalFile.toPath());
   }
 
-   public UserOrdersDTO getOrders(int userId,HttpSession session){
-       this.verifyUserId(userId,session,"You can not get orders for another user!");
+   public UserOrdersDTO getOrders(int userId){
        Optional<User> userFomDb = userRepository.findById(userId);
        if(userFomDb.isEmpty()){
            throw new NotFoundException("User not found");
@@ -274,12 +253,6 @@ public class UserService {
           return false;
       }
    }
-    private void verifyUserId(int userId, HttpSession session,String message){
-        int loggedUserId = (int) session.getAttribute("LOGGED_USER_ID");
-        if(userId!=loggedUserId){
-            throw new AuthenticationException(message);
-        }
-    }
 
     private void validatePhoneNumber(String phoneNumber){
         if(phoneNumber.length()!=10) {

@@ -13,7 +13,6 @@ import com.emag.service.validatorservice.ProductValidator;
 import com.emag.util.EmailService;
 import com.emag.util.ProductUtility;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -36,8 +35,6 @@ public class ProductService extends AbstractService{
     private ProductDAO productDAO;
     @Autowired
     private EmailService emailService;
-    @Value("${file.path}")
-    private String filePath;
 
     public ProductDTO addProduct(RequestProductDTO requestProductDTO) {
         ProductValidator.validateProductInputData(requestProductDTO);
@@ -60,14 +57,13 @@ public class ProductService extends AbstractService{
         if (model != null && !model.trim().equals("")){
             product.setModel(model.trim());
         }
-//        TODO validate regular price is not lower than discounted price
-//        boolean priceExceptionFlag = false;
-//        if (priceExceptionFlag){
-//            throw new BadRequestException("Discounted price should be lower than regular price");
-//        }
+        boolean priceExceptionFlag = false;
         boolean priceEmailAlert = false;
         Double newRegularPrice = requestProductDTO.getRegularPrice();
         if (newRegularPrice != null && newRegularPrice > 0){
+            if (newRegularPrice <= product.getDiscountedPrice()){
+                priceExceptionFlag = true;
+            }
             if (newRegularPrice < product.getRegularPrice()) {
                 priceEmailAlert = true;
             }
@@ -75,8 +71,12 @@ public class ProductService extends AbstractService{
         }
         Double newDiscountedPrice = requestProductDTO.getDiscountedPrice();
         if (newDiscountedPrice != null && newDiscountedPrice > 0){
+            priceExceptionFlag = newDiscountedPrice >= product.getRegularPrice();
             priceEmailAlert = newDiscountedPrice < product.getDiscountedPrice();
             product.setDiscountedPrice(newDiscountedPrice);
+        }
+        if (priceExceptionFlag) {
+            throw new BadRequestException("Discounted price should be lower than regular price");
         }
         String description = requestProductDTO.getDescription();
         if (description != null && !description.trim().equals("")){

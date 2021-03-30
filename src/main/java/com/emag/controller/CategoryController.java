@@ -46,8 +46,7 @@ public class CategoryController extends AbstractController{
     }
 
     @PostMapping("/category/discount")
-    public List<CategoryDTO> addDiscountForCategory(
-            @RequestBody AddDiscountCategoryDTO addDiscountCategoryDTO, HttpSession session){
+    public List<CategoryDTO> addDiscountForCategory(@RequestBody AddDiscountCategoryDTO addDiscountCategoryDTO, HttpSession session){
         sessionManager.adminVerification(session);
         return categoryService.addDiscountForCategory(addDiscountCategoryDTO);
     }

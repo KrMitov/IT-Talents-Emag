@@ -46,6 +46,8 @@ public class ProductDTO {
         this.reviews = new ArrayList<>();
         product.getReviews().forEach(review -> reviews.add(new ReviewDTO(review)));
         this.imagesIds = new ArrayList<>();
-        product.getProductImages().forEach(image -> imagesIds.add(image.getId()));
+        if (product.getProductImages() != null) {
+            product.getProductImages().forEach(image -> imagesIds.add(image.getId()));
+        }
     }
 }
