@@ -19,6 +19,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
 import java.io.*;
 import java.nio.file.Files;
 import java.sql.Timestamp;
@@ -171,6 +172,7 @@ public class UserService {
       return result;
   }
 
+   @Transactional
    public UserImage uploadImage(MultipartFile file,int userId) throws IOException {
       if(file == null){
           throw new BadRequestException("You have to select an image");

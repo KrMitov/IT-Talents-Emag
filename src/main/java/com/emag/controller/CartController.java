@@ -21,13 +21,13 @@ public class CartController extends AbstractController{
     @PostMapping("/cart")
     public void addProductToCArt(@RequestBody CartDTO dto, HttpSession session){
            sessionManager.getLoggedUser(session);
-           cartService.addProductToCart(dto.getProductId(),dto.getUserId());
+           cartService.addProductToCart(dto.getProductId(),dto.getUserId(),session);
     }
 
     @DeleteMapping("/cart")
     public void removeProduct(@RequestBody CartDTO dto,HttpSession session){
         sessionManager.getLoggedUser(session);
-        cartService.removeProductFromCart(dto.getProductId(),dto.getUserId());
+        cartService.removeProductFromCart(dto.getProductId(),dto.getUserId(),session);
     }
 
     @PutMapping("/cart/edit")
@@ -36,7 +36,7 @@ public class CartController extends AbstractController{
         if(dto.getQuantity()<1 || dto.getQuantity()>50){
             throw new BadRequestException("wrong quantity for product");
         }
-        cartService.changeQuantityOfProduct(dto.getProductId(),dto.getUserId(),dto.getQuantity());
+        cartService.changeQuantityOfProduct(dto.getProductId(),dto.getUserId(),dto.getQuantity(),session);
     }
 
 }

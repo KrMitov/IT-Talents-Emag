@@ -1,5 +1,6 @@
 package com.emag.service;
 
+import com.emag.exceptions.AuthenticationException;
 import com.emag.model.dao.UserCartDAO;
 import com.emag.model.pojo.Product;
 import com.emag.model.pojo.User;
@@ -12,6 +13,7 @@ import com.emag.model.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.servlet.http.HttpSession;
 import java.util.List;
 import java.util.Optional;
 
@@ -27,7 +29,8 @@ public class CartService {
     @Autowired
     UserCartDAO userCartDAO;
 
-    public void addProductToCart(int productId, int userId){
+    public void addProductToCart(int productId, int userId, HttpSession session){
+        this.verifyUserId(userId,session);
         UserCartsKey primaryKey = new UserCartsKey();
         primaryKey.setUserId(userId);
         primaryKey.setProductId(productId);
@@ -49,11 +52,13 @@ public class CartService {
        }
     }
 
-    public void removeProductFromCart(int productId,int userId){
-           userCartDAO.removeProductFromCart(productId,userId);
+    public void removeProductFromCart(int productId,int userId,HttpSession session){
+        this.verifyUserId(userId,session);
+        userCartDAO.removeProductFromCart(productId,userId);
     }
 
-    public void changeQuantityOfProduct(int productId,int userId,int quantity){
+    public void changeQuantityOfProduct(int productId,int userId,int quantity,HttpSession session){
+        this.verifyUserId(userId,session);
         UserCartsKey primaryKey = new UserCartsKey();
         primaryKey.setProductId(productId);
         primaryKey.setUserId(userId);
@@ -100,6 +105,13 @@ public class CartService {
             }
         }
         return userCart;
+    }
+
+    private void verifyUserId(int userId,HttpSession session){
+        int loggedUserId = (int) session.getAttribute("LOGGED_USER_ID");
+        if(userId!=loggedUserId){
+            throw new AuthenticationException("You can not make changes to another user's cart!");
+        }
     }
 
 }
