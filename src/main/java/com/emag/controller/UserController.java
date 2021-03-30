@@ -7,6 +7,7 @@ import com.emag.model.dto.registerdto.RegisterRequestUserDTO;
 import com.emag.model.dto.registerdto.RegisterResponseUserDTO;
 import com.emag.model.dto.userdto.EditProfileRequestDTO;
 import com.emag.model.dto.userdto.LoginRequestUserDTO;
+import com.emag.model.dto.userdto.UserReviewsDTO;
 import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
 import com.emag.model.pojo.UserImage;
 import com.emag.service.UserService;
@@ -88,4 +89,9 @@ public class UserController extends AbstractController{
         return userService.getOrders(id);
     }
 
+    @GetMapping("/users/{id}/reviews")
+    public UserReviewsDTO getReviewsByUser(@PathVariable int id, HttpSession session){
+        sessionManager.userVerification(session, id);
+        return userService.getReviews(id);
+    }
 }

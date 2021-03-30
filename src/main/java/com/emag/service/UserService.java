@@ -148,7 +148,7 @@ public class UserService extends AbstractService{
       return new ProductsFromCartForUserDTO(user);
   }
 
-  public UserReviewsDTO getReviews(int userId,HttpSession session){
+  public UserReviewsDTO getReviews(int userId){
       Optional<User> userFromDb = userRepository.findById(userId);
       if(userFromDb.isEmpty()){
           throw new NotFoundException("user not found");
