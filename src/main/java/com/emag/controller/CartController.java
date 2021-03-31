@@ -19,24 +19,21 @@ public class CartController extends AbstractController{
     SessionManager sessionManager;
 
     @PostMapping("/cart")
-    public void addProductToCArt(@RequestBody CartDTO dto, HttpSession session){
-           sessionManager.getLoggedUser(session);
-           cartService.addProductToCart(dto.getProductId(),dto.getUserId(),session);
+    public String addProductToCArt(@RequestBody CartDTO dto, HttpSession session){
+        sessionManager.userVerification(session,dto.getUserId());
+        return cartService.addProductToCart(dto.getProductId(),dto.getUserId());
     }
 
     @DeleteMapping("/cart")
-    public void removeProduct(@RequestBody CartDTO dto,HttpSession session){
-        sessionManager.getLoggedUser(session);
-        cartService.removeProductFromCart(dto.getProductId(),dto.getUserId(),session);
+    public String removeProduct(@RequestBody CartDTO dto,HttpSession session){
+        sessionManager.userVerification(session,dto.getUserId());
+        return cartService.removeProductFromCart(dto.getProductId(),dto.getUserId());
     }
 
     @PutMapping("/cart/edit")
-    public void changeQuantity(@RequestBody UpdateCartQuantityDTO dto,HttpSession session){
-        sessionManager.getLoggedUser(session);
-        if(dto.getQuantity()<1 || dto.getQuantity()>50){
-            throw new BadRequestException("wrong quantity for product");
-        }
-        cartService.changeQuantityOfProduct(dto.getProductId(),dto.getUserId(),dto.getQuantity(),session);
+    public String changeQuantity(@RequestBody UpdateCartQuantityDTO dto,HttpSession session){
+        sessionManager.userVerification(session,dto.getUserId());
+        return cartService.changeQuantityOfProduct(dto.getProductId(),dto.getUserId(),dto.getQuantity());
     }
 
 }

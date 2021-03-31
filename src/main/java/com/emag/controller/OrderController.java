@@ -19,9 +19,9 @@ public class OrderController extends AbstractController{
     SessionManager sessionManager;
 
     @PostMapping("/orders")
-    public void createOrder(@RequestBody CreateOrderDTO dto, HttpSession session){
-        sessionManager.getLoggedUser(session);
-        orderService.createOrder(dto,session);
+    public String createOrder(@RequestBody CreateOrderDTO dto, HttpSession session){
+        sessionManager.userVerification(session,dto.getUserId());
+        return orderService.createOrder(dto);
     }
 
 }
