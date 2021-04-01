@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import javax.validation.constraints.Past;
+import javax.validation.constraints.Size;
 import java.sql.Timestamp;
 
 @Getter
