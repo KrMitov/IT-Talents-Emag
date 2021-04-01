@@ -3,23 +3,17 @@ package com.emag.service;
 import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
 import com.emag.model.dao.ProductDAO;
-import com.emag.model.dto.productimagedto.DeleteImagesDTO;
 import com.emag.model.dto.produtcdto.*;
 import com.emag.model.dto.reviewdto.ReviewDTO;
 import com.emag.model.pojo.Product;
-import com.emag.model.pojo.ProductImage;
 import com.emag.model.pojo.User;
-import com.emag.service.validatorservice.ProductValidator;
+import com.emag.util.ProductValidator;
 import com.emag.util.EmailService;
 import com.emag.util.ProductUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -175,7 +169,7 @@ public class ProductService extends AbstractService{
             queryParams.append(maxPrice.toString()).append(",");
         }
         Double minPrice = filter.getMinPrice();
-        if (minPrice != null && minPrice > 0){
+        if (minPrice != null && minPrice >= 0){
             query.append("IF(discounted_price IS NOT NULL, discounted_price, regular_price) >= ? AND ");
             queryParams.append(minPrice.toString()).append(",");
         }
@@ -246,44 +240,5 @@ public class ProductService extends AbstractService{
             throw new NotFoundException("No reviews for this product");
         }
         return reviews;
-    }
-
-    public ProductWithImagesDTO uploadProductImages(int id, MultipartFile[] receivedFiles) throws IOException {
-        OutputStream os = null;
-        for (MultipartFile file : receivedFiles){
-            File physicalFile = new File(filePath+File.separator+System.nanoTime()+".png");
-            os = new FileOutputStream(physicalFile);
-            os.write(file.getBytes());
-            ProductImage productImage = new ProductImage();
-            productImage.setUrl(physicalFile.getAbsolutePath());
-            productImage.setProduct(getProductIfExists(id));
-            productImageRepository.save(productImage);
-        }
-        if (os != null){
-            os.close();
-        }
-        return new ProductWithImagesDTO(getProductIfExists(id));
-    }
-
-    public List<Integer> removeProductImages(DeleteImagesDTO deleteImageDTO) throws IOException{
-        List<Integer> imagesIds = deleteImageDTO.getImagesIds();
-        if (imagesIds == null || imagesIds.isEmpty()){
-            throw new BadRequestException("Invalid product images ids");
-        }
-        imagesIds.forEach(id -> {
-            if (id == null){
-                throw new BadRequestException("Invalid product images ids");
-            }
-        });
-        for (Integer id : imagesIds){
-            ProductImage productImage = getProductImageIfExists(id);
-            Files.delete(Path.of(productImage.getUrl()));
-            productImageRepository.delete(productImage);
-        }
-        return imagesIds;
-    }
-
-    public byte[] getProductImage(int imageId) throws IOException {
-        return Files.readAllBytes(Path.of(getProductImageIfExists(imageId).getUrl()));
     }
 }

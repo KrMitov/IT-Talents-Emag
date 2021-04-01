@@ -6,7 +6,7 @@ import com.emag.model.dto.reviewdto.ReviewDTO;
 import com.emag.model.pojo.Product;
 import com.emag.model.pojo.Review;
 import com.emag.model.pojo.User;
-import com.emag.service.validatorservice.ReviewValidator;
+import com.emag.util.ReviewValidator;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;

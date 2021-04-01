@@ -6,7 +6,7 @@ import com.emag.model.dto.categorydto.*;
 import com.emag.model.dto.produtcdto.ProductDTO;
 import com.emag.model.pojo.Category;
 import com.emag.model.pojo.Product;
-import com.emag.service.validatorservice.CategoryValidator;
+import com.emag.util.CategoryValidator;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;

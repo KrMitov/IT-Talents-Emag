@@ -13,6 +13,7 @@ import com.emag.model.dto.userdto.LoginRequestUserDTO;
 import com.emag.model.dto.userdto.UserReviewsDTO;
 import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
 import com.emag.model.pojo.*;
+import org.apache.tika.Tika;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,7 @@ import java.nio.file.Files;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.time.LocalDate;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -140,23 +142,29 @@ public class UserService extends AbstractService {
 
     @Transactional
     public UserImage uploadImage(MultipartFile file, int userId) throws IOException {
-        if (file == null) {
-            throw new BadRequestException("You have to select an image");
+        if (file.isEmpty()) {
+            throw new BadRequestException("No image uploaded");
         }
-        File physicalFile = new File(filePath + File.separator + System.nanoTime() + ".png");
+        Tika tika = new Tika();
+        String detectedType = tika.detect(file.getBytes());
+        List<String> acceptedImageMimeTypes = Arrays.asList(ACCEPTED_IMAGE_MIME_TYPES);
+        if (!acceptedImageMimeTypes.contains(detectedType)){
+            throw new BadRequestException("Image type not supported!");
+        }
+        File physicalFile = new File(filePath + File.separator + System.nanoTime() + "." +
+                detectedType.substring(detectedType.indexOf("/") + 1));
         UserImage userImage = new UserImage();
-        OutputStream os = new FileOutputStream(physicalFile);
-        os.write(file.getBytes());
-        userImage.setUrl(physicalFile.getAbsolutePath());
-        Optional<User> userFromDb = userRepository.findById(userId);
-        User user = userFromDb.get();
-        userImage = userImageRepository.save(userImage);
-        user.setImage(userImage);
-        userRepository.save(user);
-        os.close();
+        try (OutputStream os = new FileOutputStream(physicalFile)){
+            os.write(file.getBytes());
+            userImage.setUrl(physicalFile.getAbsolutePath());
+            Optional<User> userFromDb = userRepository.findById(userId);
+            User user = userFromDb.get();
+            userImage = userImageRepository.save(userImage);
+            user.setImage(userImage);
+            userRepository.save(user);
+        }
         return userImage;
-
-   }
+    }
 
     public byte[] downloadImage(int userId) throws IOException {
         User user = findUserById(userId);

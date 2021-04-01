@@ -15,11 +15,11 @@ import java.util.List;
 @Setter
 public class ProductWithImagesDTO {
 
-    private int id;
+    private int productId;
     private List<Integer> imagesIds;
 
     public ProductWithImagesDTO(Product product) {
-        this.id = product.getId();
+        this.productId = product.getId();
         this.imagesIds = new ArrayList<>();
         product.getProductImages().forEach(image -> imagesIds.add(image.getId()));
     }

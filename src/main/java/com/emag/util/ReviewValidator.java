@@ -1,4 +1,4 @@
-package com.emag.service.validatorservice;
+package com.emag.util;
 
 import com.emag.exceptions.BadRequestException;
 import com.emag.model.dto.reviewdto.RequestReviewDTO;

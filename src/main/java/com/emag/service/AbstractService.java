@@ -26,6 +26,7 @@ public abstract class AbstractService {
     protected UserImageRepository userImageRepository;
     @Value("${file.path}")
     protected String filePath;
+    protected static final String[] ACCEPTED_IMAGE_MIME_TYPES = {"image/png", "image/jpeg"};
 
     protected Product getProductIfExists(int id){
         Product product = productRepository.findById(id).orElse(null);
