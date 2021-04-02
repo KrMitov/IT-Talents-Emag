@@ -139,6 +139,7 @@ public class ProductService extends AbstractService{
     }
 
     public List<ProductDTO> filterProducts(FilterProductsDTO filter) throws SQLException {
+        //TODO move query creation to DAO
         StringBuilder query = new StringBuilder("SELECT * FROM products WHERE deleted_at IS NULL AND ");
         StringBuilder queryParams = new StringBuilder();
         List<Integer> productsPerPageParams = new ArrayList<>();
