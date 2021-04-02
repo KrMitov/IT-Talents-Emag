@@ -2,6 +2,8 @@ package com.emag.service;
 
 import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
+import com.emag.model.dao.UserCartDAO;
+import com.emag.model.dao.UserDAO;
 import com.emag.model.dto.addressdto.AddressDTO;
 import com.emag.model.dto.produtcdto.LikedProductsForUserDTO;
 import com.emag.model.dto.produtcdto.ProductsFromCartForUserDTO;
@@ -14,6 +16,8 @@ import com.emag.model.dto.userdto.UserReviewsDTO;
 import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
 import com.emag.model.pojo.*;
 import org.apache.tika.Tika;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,11 +37,12 @@ import java.util.Optional;
 public class UserService extends AbstractService {
 
     private static final int USER_ROLE_ID = 1;
+    @Autowired
+    UserDAO userDAO;
 
     public RegisterResponseUserDTO register(RegisterRequestUserDTO dto) {
         String email = dto.getEmail();
-        User userByEmail = userRepository.findByEmail(email);
-        if (userByEmail != null) {
+        if (userRepository.findByEmail(email) != null) {
             throw new BadRequestException("Email already exists!");
         }
         if (!emailIsValid(email)) {
@@ -328,6 +333,7 @@ public class UserService extends AbstractService {
                 }
             }
         }else{
+            if(validateBy.equals("symbols"))
             for (int i = 0; i < address.length(); i++) {
                 if (specialCharacters.contains(String.valueOf(address.charAt(i)))) {
                     throw new BadRequestException(message);
@@ -343,6 +349,14 @@ public class UserService extends AbstractService {
             Optional<User> userFromDb = userRepository.findById(id);
             return userFromDb.get();
         }
+    }
+
+    @Scheduled(cron = "0 * * * * *")
+    public void printStatistics(){
+      userDAO.getUsersWhoOrdered("2021-03-31");
+      userDAO.getOrdersByCity("Burgas",2);
+      userDAO.getUsersByEmailAndProducts("abv.bg",2,1000,3000);
+      userDAO.printUsersWithMostOrders(5);
     }
 
 }

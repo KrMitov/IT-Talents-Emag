@@ -2,10 +2,7 @@ package com.emag.model.dto.userdto;
 
 import com.emag.model.dto.produtcdto.ProductDTO;
 import com.emag.model.dto.roledto.RoleWithoutUsersDTO;
-import com.emag.model.pojo.Address;
-import com.emag.model.pojo.Product;
-import com.emag.model.pojo.User;
-import com.emag.model.pojo.UserImage;
+import com.emag.model.pojo.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -24,7 +21,8 @@ public class UserWithoutPasswordDTO {
     private String nickname;
     private String email;
     private String name;
-    private List<Address> addresses;
+    private List<ProductDTO> likedProducts;
+    private List<ProductDTO> productsInCart;
     private RoleWithoutUsersDTO role;
     private Date birthdate;
     private Timestamp createdAt;
@@ -36,7 +34,14 @@ public class UserWithoutPasswordDTO {
         this.nickname = user.getNickname();
         this.email = user.getEmail();
         this.name = user.getName();
-        this.addresses = user.getAddresses();
+        this.likedProducts = new ArrayList<>();
+        for (Product likedProduct : user.getLikedProducts()) {
+            this.likedProducts.add(new ProductDTO(likedProduct));
+        }
+        this.productsInCart = new ArrayList<>();
+        for (UserCart userCart : user.getProductsInCart()) {
+            this.productsInCart.add(new ProductDTO(userCart.getProduct()));
+        }
         this.phoneNumber = user.getPhoneNumber();
         this.role = new RoleWithoutUsersDTO(user.getRole());
         if(user.getBirthDate()!=null) {
