@@ -6,6 +6,7 @@ import com.emag.exceptions.NotFoundException;
 import com.emag.model.dto.errordto.ErrorDTO;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
@@ -36,6 +37,13 @@ public abstract class AbstractController {
                 HttpStatus.BAD_REQUEST.value(),
                 LocalDateTime.now(),
                 e.getClass().getName());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ErrorDTO handleValidationExceptions(MethodArgumentNotValidException e) {
+        StringBuilder errors = new StringBuilder();
+        e.getBindingResult().getAllErrors().forEach((error) -> errors.append(error.getDefaultMessage()).append("; "));
+        return this.handleBadRequests(new BadRequestException(errors.toString()));
     }
 
     @ExceptionHandler(AuthenticationException.class)
