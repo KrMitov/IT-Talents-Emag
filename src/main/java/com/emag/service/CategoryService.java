@@ -6,7 +6,6 @@ import com.emag.model.dto.categorydto.*;
 import com.emag.model.dto.produtcdto.ProductDTO;
 import com.emag.model.pojo.Category;
 import com.emag.model.pojo.Product;
-import com.emag.util.CategoryValidator;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -35,19 +34,15 @@ public class CategoryService extends AbstractService{
     }
 
     public CategoryDTO addCategory(RequestCategoryDTO requestCategoryDTO) {
-        String trimmedName = requestCategoryDTO.getName().trim();
-        CategoryValidator.validateCategoryName(trimmedName);
         Category category = new Category();
-        category.setName(trimmedName);
+        category.setName(requestCategoryDTO.getName().trim());
         category.setParentCategory(getParentCategory(requestCategoryDTO.getParentCategoryId()));
         return new CategoryDTO(categoryRepository.save(category));
     }
 
     public CategoryDTO editCategory(int id, RequestCategoryDTO requestCategoryDTO) {
         Category editedCategory = getCategoryIfExists(id);
-        String trimmedName = requestCategoryDTO.getName().trim();
-        CategoryValidator.validateCategoryName(trimmedName);
-        editedCategory.setName(trimmedName);
+        editedCategory.setName(requestCategoryDTO.getName().trim());
         editedCategory.setParentCategory(getParentCategory(requestCategoryDTO.getParentCategoryId()));
         return new CategoryDTO(categoryRepository.save(editedCategory));
     }

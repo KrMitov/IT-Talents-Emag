@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -17,41 +18,41 @@ public class CategoryController extends AbstractController{
     @Autowired
     private SessionManager sessionManager;
 
-    @GetMapping("/category/{id}")
+    @GetMapping("/categories/{id}")
     public List<ProductDTO> getProductsFromCategory(@PathVariable int id){
         return categoryService.getProductsFromCategory(id);
     }
 
-    @PostMapping("/category")
-    public CategoryDTO addCategory(@RequestBody RequestCategoryDTO requestCategoryDTO, HttpSession session){
+    @PostMapping("/categories")
+    public CategoryDTO addCategory(@Valid @RequestBody RequestCategoryDTO requestCategoryDTO, HttpSession session){
         sessionManager.adminVerification(session);
         return categoryService.addCategory(requestCategoryDTO);
     }
 
-    @PutMapping("/category/{id}")
-    public CategoryDTO editCategory(@PathVariable int id, @RequestBody RequestCategoryDTO requestCategoryDTO, HttpSession session){
+    @PutMapping("/categories/{id}")
+    public CategoryDTO editCategory(@PathVariable int id,@Valid @RequestBody RequestCategoryDTO requestCategoryDTO, HttpSession session){
         sessionManager.adminVerification(session);
         return categoryService.editCategory(id, requestCategoryDTO);
     }
 
-    @DeleteMapping("/category/{id}")
+    @DeleteMapping("/categories/{id}")
     public CategoryAndSubcategoriesDTO deleteCategory(@PathVariable int id, HttpSession session){
         sessionManager.adminVerification(session);
         return categoryService.deleteCategory(id);
     }
 
-    @GetMapping("/category")
+    @GetMapping("/categories")
     public List<CategoryAndSubcategoriesDTO> getAllCategories(){
         return categoryService.getAllCategories();
     }
 
-    @PostMapping("/category/discount")
+    @PostMapping("/categories/discount")
     public List<CategoryDTO> addDiscountForCategory(@RequestBody AddDiscountCategoryDTO addDiscountCategoryDTO, HttpSession session){
         sessionManager.adminVerification(session);
         return categoryService.addDiscountForCategory(addDiscountCategoryDTO);
     }
 
-    @DeleteMapping("/category/discount")
+    @DeleteMapping("/categories/discount")
     public List<CategoryDTO> removeDiscountForCategory(
             @RequestBody RemoveDiscountCategoryDTO RemoveDiscountCategoryDTO, HttpSession session){
         sessionManager.adminVerification(session);

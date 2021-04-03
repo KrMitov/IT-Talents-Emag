@@ -6,7 +6,6 @@ import com.emag.model.dto.reviewdto.ReviewDTO;
 import com.emag.model.pojo.Product;
 import com.emag.model.pojo.Review;
 import com.emag.model.pojo.User;
-import com.emag.util.ReviewValidator;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -17,7 +16,6 @@ import java.util.List;
 public class ReviewService extends AbstractService{
 
     public ReviewDTO addReview(RequestReviewDTO requestReviewDTO, int userId) {
-        ReviewValidator.validateReviewInputData(requestReviewDTO);
         Product reviewedProduct = getProductIfExists(requestReviewDTO.getProductId());
         User reviewer = getUserIfExists(userId);
         if (getReview(reviewedProduct, reviewer) != null){
@@ -27,7 +25,6 @@ public class ReviewService extends AbstractService{
     }
 
     public ReviewDTO editReview(RequestReviewDTO requestReviewDTO, int userId){
-        ReviewValidator.validateReviewInputData(requestReviewDTO);
         Product reviewedProduct = getProductIfExists(requestReviewDTO.getProductId());
         User reviewer = getUserIfExists(userId);
         Review review = getReview(reviewedProduct, reviewer);

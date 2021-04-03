@@ -17,7 +17,6 @@ import javax.transaction.Transactional;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -139,72 +138,12 @@ public class ProductService extends AbstractService{
     }
 
     public List<ProductDTO> filterProducts(FilterProductsDTO filter) throws SQLException {
-        //TODO move query creation to DAO
-        StringBuilder query = new StringBuilder("SELECT * FROM products WHERE deleted_at IS NULL AND ");
-        StringBuilder queryParams = new StringBuilder();
-        List<Integer> productsPerPageParams = new ArrayList<>();
-        Integer categoryId = filter.getCategoryId();
-        if (categoryId != null && getCategoryIfExists(categoryId) != null){
-            query.append("category_id = ? AND ");
-            queryParams.append(categoryId.toString()).append(",");
+        if (filter.getCategoryId() != null) {
+            //check if category exists
+            getCategoryIfExists(filter.getCategoryId());
         }
-        String keyword = filter.getSearchKeyword();
-        if (keyword != null && !keyword.trim().equals("")){
-            query.append("full_name LIKE ? OR description LIKE ? AND ");
-            queryParams.append("%").append(keyword).append("%").append(",");
-            queryParams.append("%").append(keyword).append("%").append(",");
-        }
-        String brand = filter.getBrand();
-        if (brand != null && !brand.trim().equals("")){
-            query.append("brand LIKE ? AND ");
-            queryParams.append("%").append(brand).append("%").append(",");
-        }
-        String model = filter.getModel();
-        if (model != null && !model.trim().equals("")){
-            query.append("model LIKE ? AND ");
-            queryParams.append("%").append(model).append("%").append(",");
-        }
-        Double maxPrice = filter.getMaxPrice();
-        if (maxPrice != null && maxPrice > 0){
-            query.append("IF(discounted_price IS NOT NULL, discounted_price, regular_price) <= ? AND ");
-            queryParams.append(maxPrice.toString()).append(",");
-        }
-        Double minPrice = filter.getMinPrice();
-        if (minPrice != null && minPrice >= 0){
-            query.append("IF(discounted_price IS NOT NULL, discounted_price, regular_price) >= ? AND ");
-            queryParams.append(minPrice.toString()).append(",");
-        }
-        Boolean discountedOnly = filter.getDiscountedOnly();
-        if (discountedOnly != null && discountedOnly){
-            query.append("discounted_price IS NOT NULL ");
-        }
-        //removes the last AND if it is not necessary
-        if (query.substring(query.length() - 4).equals("AND ")){
-            query = new StringBuilder(query.substring(0, query.length() - 4));
-        }
-        Boolean orderByPrice = filter.getOrderByPrice();
-        if (orderByPrice != null && orderByPrice){
-            query.append("ORDER BY IF(discounted_price IS NOT NULL, discounted_price, regular_price) ");
-            Boolean sortDesc = filter.getSortDesc();
-            if (sortDesc != null && sortDesc){
-                query.append("DESC ");
-            }
-        }
-        Integer productsPerPage = filter.getProductsPerPage();
-        if (productsPerPage != null && productsPerPage >= 0){
-            query.append("LIMIT ? ");
-            productsPerPageParams.add(productsPerPage);
-            Integer pageNumber = filter.getPageNumber();
-            if (pageNumber != null && pageNumber > 0){
-                query.append("OFFSET ?");
-                int offset = (pageNumber - 1) * productsPerPage;
-                productsPerPageParams.add(offset);
-            }
-        }
-        query.append(";");
-        List<String> params = new ArrayList<>(Arrays.asList(queryParams.toString().split(",")));
         List<ProductDTO> products = new ArrayList<>();
-        productDAO.getFilteredProductsIds(query.toString(), params, productsPerPageParams)
+        productDAO.getFilteredProductsIds(filter)
                 .forEach(id -> products.add(new ProductDTO(getProductIfExists(id))));
         return products;
     }

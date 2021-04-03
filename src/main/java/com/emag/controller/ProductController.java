@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 import java.sql.SQLException;
 import java.util.List;
 
@@ -19,7 +20,7 @@ public class ProductController extends AbstractController{
     private SessionManager sessionManager;
 
     @PostMapping("/products")
-    public ProductDTO addProduct(@RequestBody RequestProductDTO requestProductDTO, HttpSession session){
+    public ProductDTO addProduct(@Valid @RequestBody RequestProductDTO requestProductDTO, HttpSession session){
         sessionManager.adminVerification(session);
         return productService.addProduct(requestProductDTO);
     }

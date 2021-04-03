@@ -1,7 +1,7 @@
 package com.emag.service;
 
 import com.emag.exceptions.BadRequestException;
-import com.emag.model.dto.productimagedto.DeleteImagesDTO;
+import com.emag.model.dto.productimagedto.DeleteProductImagesDTO;
 import com.emag.model.dto.produtcdto.ProductWithImagesDTO;
 import com.emag.model.pojo.ProductImage;
 import org.apache.tika.Tika;
@@ -49,11 +49,8 @@ public class ProductImageService extends AbstractService{
         return new ProductWithImagesDTO(getProductIfExists(id));
     }
 
-    public List<Integer> removeProductImages(DeleteImagesDTO deleteImageDTO) throws IOException{
+    public List<Integer> removeProductImages(DeleteProductImagesDTO deleteImageDTO) throws IOException{
         List<Integer> imagesIds = deleteImageDTO.getImagesIds();
-        if (imagesIds == null || imagesIds.isEmpty()){
-            throw new BadRequestException("Invalid product images ids");
-        }
         imagesIds.forEach(id -> {
             if (id == null){
                 throw new BadRequestException("Invalid product images ids");
