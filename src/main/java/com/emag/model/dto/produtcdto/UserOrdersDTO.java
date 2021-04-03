@@ -2,6 +2,7 @@ package com.emag.model.dto.produtcdto;
 
 import com.emag.model.dto.orderdto.OrderDTO;
 import com.emag.model.pojo.Order;
+import com.emag.model.pojo.OrderedProduct;
 import com.emag.model.pojo.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

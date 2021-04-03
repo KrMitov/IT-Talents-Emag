@@ -21,14 +21,16 @@ public class Order {
     @Column(name = "user_id",insertable = false,updatable = false)
     private int userId;
     private Timestamp createdAt;
-    @ManyToMany
-    @JsonManagedReference
-    @JoinTable(
-            name = "orders_have_products",
-            joinColumns = {@JoinColumn(name = "order_id")},
-            inverseJoinColumns = {@JoinColumn(name = "product_id")}
-    )
-    private List<Product> productsInOrder;
+//    @ManyToMany
+//    @JsonManagedReference
+//    @JoinTable(
+//            name = "orders_have_products",
+//            joinColumns = {@JoinColumn(name = "order_id")},
+//            inverseJoinColumns = {@JoinColumn(name = "product_id")}
+//    )
+//    private List<Product> productsInOrder;
+    @OneToMany(mappedBy = "order")
+    private List<OrderedProduct> productsQuantityInOrder;
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User userHasOrder;

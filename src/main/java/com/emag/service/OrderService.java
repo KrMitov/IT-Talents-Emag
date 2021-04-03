@@ -2,12 +2,10 @@ package com.emag.service;
 
 import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
+import com.emag.model.dao.UserOrderDAO;
 import com.emag.model.dto.orderdto.CreateOrderDTO;
 import com.emag.model.pojo.*;
-import com.emag.model.repository.CategoryRepository;
-import com.emag.model.repository.OrderRepository;
-import com.emag.model.repository.ProductRepository;
-import com.emag.model.repository.UserRepository;
+import com.emag.model.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,12 +13,13 @@ import javax.transaction.Transactional;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
-public class OrderService {
+public class OrderService extends AbstractService{
+
+    private static final int MIN_PERCENTAGE_VALUE = 1;
+    private static final int MAX_PERCENTAGE_VALUE = 95;
     @Autowired
     OrderRepository orderRepository;
     @Autowired
@@ -30,18 +29,22 @@ public class OrderService {
     @Autowired
     CategoryRepository categoryRepository;
     @Autowired
+    CouponRepository couponRepository;
+    @Autowired
     CartService cartService;
-    private static final int MIN_PERCENTAGE_VALUE = 1;
-    private static final int MAX_PERCENTAGE_VALUE = 95;
+    @Autowired
+    UserOrderDAO userOrderDAO;
+    @Autowired
+    OrderedProductsRepository orderedProductsRepository;
 
     @Transactional
     public String createOrder(CreateOrderDTO dto){
-        this.validateVoucher(dto);
+        this.validateOrder(dto);
+//        this.validateCoupon(dto);
         User user = findUserById(dto.getUserId());
         Order order = new Order();
         order.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
         order.setUserHasOrder(user);
-        int[] requestedProducts = dto.getProductsId();
         Product discountedProduct = null;
         if(dto.getCoupon().getProductId()!=0) {
             discountedProduct = this.findProductById(dto.getCoupon().getProductId());
@@ -52,20 +55,45 @@ public class OrderService {
         }
         int discountPercentage = dto.getCoupon().getDiscountPercent();
         List<Product> products = new ArrayList<>();
+        int[] requestedProducts = dto.getProductsId();
+        HashMap<Product,Integer> productQuantities = new HashMap<>();
         for (int i = 0; i < requestedProducts.length; i++) {
             Product product = findProductById(requestedProducts[i]);
             this.checkCartForProduct(user,product);
+            int quantityOfProduct = this.getQuantityOfProduct(user,product);
+            productQuantities.put(product,quantityOfProduct);
             if(!isCouponEmpty(dto)){
-                addProductToOrderList(product,discountedProduct,discountedCategory,discountPercentage);
+                Coupon coupon =this.validateCoupon(dto);
+                if(this.couponIsValidForProduct(coupon,product)) {
+                    changeProductPrice(product, discountedProduct, discountedCategory, discountPercentage);
+                }
             }
             int productId = product.getId();
             cartService.removeProductFromCart(productId,user.getId());
             products.add(product);
         }
-        order.setProductsInOrder(products);
-        orderRepository.save(order);
+
+        insertOrderedQuantity(order,productQuantities);
+//        orderRepository.save(order);
         return "Order created successfully";
     }
+
+    private void insertOrderedQuantity(Order order, HashMap<Product, Integer> productQuantities) {
+        int orderId = order.getId();
+        for (Map.Entry<Product, Integer> entry : productQuantities.entrySet()) {
+            Product product = entry.getKey();
+            OrderedProductsKey primaryKey = new OrderedProductsKey();
+            primaryKey.setOrderId(orderId);
+            primaryKey.setProductId(product.getId());
+            OrderedProduct orderedProduct = new OrderedProduct();
+            orderedProduct.setPrimaryKey(primaryKey);
+            orderedProduct.setOrder(order);
+            orderedProduct.setProduct(product);
+            orderedProduct.setQuantity(entry.getValue());
+            orderedProductsRepository.save(orderedProduct);
+        }
+    }
+
 
     private void setDiscountedPrice(Product product,int discountPercentage){
         double regularPrice = product.getRegularPrice();
@@ -79,6 +107,7 @@ public class OrderService {
         for (UserCart userCart : productsInCart) {
             if(userCart.getProduct().getFullName().equals(product.getFullName())){
                 isFound = true;
+                break;
             }
         }
         if(isFound == false) {
@@ -86,10 +115,31 @@ public class OrderService {
         }
     }
 
-    private void validateVoucher(CreateOrderDTO dto){
+    private int getQuantityOfProduct(User user,Product product){
+        int quantity = 0;
+        List<UserCart> productsInCart = user.getProductsInCart();
+        for (UserCart userCart : productsInCart) {
+            if(userCart.getProduct().getFullName().equals(product.getFullName())){
+                quantity = userCart.getQuantity();
+                break;
+            }
+        }
+        return quantity;
+    }
+
+    private Coupon validateCoupon(CreateOrderDTO dto){
+        Coupon coupon = null;
         if(!isCouponEmpty(dto)){
-            if (dto.getProductsId().length == 0) {
-                throw new BadRequestException("You have to select products to make an order");
+            if(dto.getCoupon().getProductId() == 0 && dto.getCoupon().getCategoryId() == 0){
+                throw new BadRequestException("Invalid coupon");
+            }
+            if(dto.getCoupon().getProductId()!=0){
+                coupon = couponRepository.findByProductHasCoupon(productRepository.findById(dto.getCoupon().getProductId()).get());
+            }else{
+                coupon = couponRepository.findByCategory(categoryRepository.findById(dto.getCoupon().getCategoryId()).get());
+            }
+            if(coupon == null){
+                throw new BadRequestException("The coupon you entered does not exist");
             }
             int discountPercent = this.getDiscountPercentage(dto);
             if (discountPercent < MIN_PERCENTAGE_VALUE || discountPercent > MAX_PERCENTAGE_VALUE) {
@@ -110,8 +160,14 @@ public class OrderService {
                 }
             }
         }
+        return coupon;
     }
 
+    private void validateOrder(CreateOrderDTO dto){
+        if (dto.getProductsId().length == 0) {
+            throw new BadRequestException("You have to select products to make an order");
+        }
+    }
     private User findUserById(int id) {
         if (userRepository.findById(id).isEmpty()) {
             throw new NotFoundException("User not found!");
@@ -154,7 +210,7 @@ public class OrderService {
         return dto.getCoupon().getDiscountPercent();
     }
 
-    private void addProductToOrderList(Product product, Product discountedProduct, Category discountedCategory, int discountPercentage){
+    private void changeProductPrice(Product product, Product discountedProduct, Category discountedCategory, int discountPercentage){
         if(discountedProduct != null) {
             if(product.getFullName().equals(discountedProduct.getFullName())) {
                 this.setDiscountedPrice(product, discountPercentage);
@@ -173,5 +229,23 @@ public class OrderService {
             }
         }
     }
+
+    private boolean couponIsValidForProduct(Coupon coupon,Product product){
+        boolean result = false;
+        if(coupon.getProductHasCoupon() != null){
+            if(coupon.getProductHasCoupon().getFullName().equals(product.getFullName())){
+                result = true;
+            }
+        }else{
+            if(coupon.getCategory() != null){
+                if(coupon.getCategory().getName().equals(product.getCategory().getName())){
+                    result = true;
+                }
+            }
+        }
+        return result;
+    }
+
+
 
 }

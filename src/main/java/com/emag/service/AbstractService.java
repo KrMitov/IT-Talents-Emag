@@ -24,6 +24,8 @@ public abstract class AbstractService {
     protected AddressRepository addressRepository;
     @Autowired
     protected UserImageRepository userImageRepository;
+    @Autowired
+    CouponRepository couponRepository;
     @Value("${file.path}")
     protected String filePath;
     protected static final String[] ACCEPTED_IMAGE_MIME_TYPES = {"image/png", "image/jpeg"};

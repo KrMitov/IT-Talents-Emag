@@ -50,6 +50,8 @@ public class Product {
     @ManyToMany(mappedBy = "productsInOrder")
     @JsonBackReference
     List<Order> productIsInOrder;
+//    @OneToMany(mappedBy = "product")
+//    List<OrderedProduct> productIsInOrder;
     @OneToMany(mappedBy = "productHasCoupon")
     @JsonBackReference
     private List<Coupon> coupons;
@@ -83,4 +85,5 @@ public class Product {
     public int hashCode() {
         return Objects.hash(id);
     }
+
 }

@@ -1,5 +1,6 @@
 package com.emag.model.pojo;
 
+import com.emag.model.dto.coupondto.CouponDTO;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
@@ -19,6 +20,7 @@ public class Coupon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
+    private int discountPercent;
     @ManyToOne
     @JsonManagedReference
     @JoinColumn(name = "product_id")
@@ -32,4 +34,15 @@ public class Coupon {
     @OneToMany(mappedBy = "coupon")
     @JsonBackReference
     private List<Order> ordersHaveCoupon;
+
+    public Coupon(CouponDTO dto,Product product,Category category){
+        this.discountPercent = dto.getDiscountPercent();
+        this.productHasCoupon = product;
+        this.category = category;
+        this.startDate = Timestamp.valueOf(dto.getStartDate());
+        if(dto.getExpireDate().length()>0) {
+            this.expireDate = Timestamp.valueOf(dto.getExpireDate());
+        }
+    }
+
 }
