@@ -66,21 +66,4 @@ public class OrderUtility {
         return result;
     }
 
-    public static int getDiscountPercentage(CreateOrderDTO dto) {
-        if (dto.getCoupon().getDiscountPercent() == 0) {
-            throw new BadRequestException("Invalid coupon");
-        }
-        return dto.getCoupon().getDiscountPercent();
-    }
-
-    public static boolean isCouponEmpty(CreateOrderDTO dto){
-        boolean result = false;
-        if(dto.getCoupon().getDiscountPercent() == 0 && dto.getCoupon().getProductId() == 0
-                && dto.getCoupon().getCategoryId() == 0 && dto.getCoupon().getStartDate().length() == 0
-                && dto.getCoupon().getExpireDate().length() ==0){
-            result = true;
-        }
-        return result;
-    }
-
 }

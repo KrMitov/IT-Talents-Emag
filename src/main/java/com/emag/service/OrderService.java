@@ -17,10 +17,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Service
-public class OrderService extends AbstractService{
-
-    private static final int MIN_PERCENTAGE_VALUE = 1;
-    private static final int MAX_PERCENTAGE_VALUE = 95;
+public class OrderService extends AbstractService {
 
     @Autowired
     CartService cartService;
@@ -34,28 +31,34 @@ public class OrderService extends AbstractService{
         Order order = new Order();
         order.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
         order.setUserHasOrder(user);
+        Coupon couponFromOrder = null;
+        if (dto.getCouponId() != 0) {
+            couponFromOrder = findCouponById(dto.getCouponId());
+        }
         Product discountedProduct = null;
-        if(dto.getCoupon().getProductId()!=0) {
-            discountedProduct = this.getProductIfExists(dto.getCoupon().getProductId());
-        }
         Category discountedCategory = null;
-        if(dto.getCoupon().getCategoryId()!=0){
-            discountedCategory = getCategoryIfExists(dto.getCoupon().getCategoryId());
+        int discountPercentage = 0;
+        if (couponFromOrder != null) {
+            if (couponFromOrder.getProductHasCoupon() != null) {
+                discountedProduct = couponFromOrder.getProductHasCoupon();
+            }
+            if (couponFromOrder.getCategory() != null) {
+                discountedCategory = couponFromOrder.getCategory();
+            }
+            discountPercentage = couponFromOrder.getDiscountPercent();
         }
-        int discountPercentage = dto.getCoupon().getDiscountPercent();
         int[] requestedProducts = dto.getProductsId();
-        HashMap<Product,Integer> productQuantities = new HashMap<>();
+        HashMap<Product, Integer> productQuantities = new HashMap<>();
         for (int i = 0; i < requestedProducts.length; i++) {
             Product product = getProductIfExists(requestedProducts[i]);
             OrderUtility.checkCartForProduct(user, product);
             int quantityOfProduct = OrderUtility.getQuantityOfProduct(user, product);
             productQuantities.put(product, quantityOfProduct);
-            if (!OrderUtility.isCouponEmpty(dto)) {
-                Coupon coupon = this.validateCoupon(dto);
-                if (OrderUtility.couponIsValidForProduct(coupon, product)) {
+            if (dto.getCouponId() != 0) {
+                if (OrderUtility.couponIsValidForProduct(couponFromOrder, product)) {
                     changeProductPrice(product, discountedProduct, discountedCategory, discountPercentage);
-                }else{
-                    throw new BadRequestException("Coupon is not valid for "+product.getFullName());
+                } else {
+                    throw new BadRequestException("Coupon is not valid for " + product.getFullName());
                 }
             }
             int productId = product.getId();
@@ -65,7 +68,7 @@ public class OrderService extends AbstractService{
             productService.editProduct(product.getId(), editedProduct);
         }
         orderRepository.save(order);
-        insertOrderedQuantity(order,productQuantities);
+        insertOrderedQuantity(order, productQuantities);
         return new OrderConfirmationDTO("Order created successfully");
     }
 
@@ -85,60 +88,21 @@ public class OrderService extends AbstractService{
         }
     }
 
-    private Coupon validateCoupon(CreateOrderDTO dto){
-        Coupon coupon = null;
-        if(!OrderUtility.isCouponEmpty(dto)){
-            if(dto.getCoupon().getProductId() == 0 && dto.getCoupon().getCategoryId() == 0){
-                throw new BadRequestException("Invalid coupon");
-            }
-            if(dto.getCoupon().getProductId()!=0){
-                coupon = couponRepository.findByProductHasCoupon(productRepository.findById(dto.getCoupon().getProductId()).get());
-            }else{
-                coupon = couponRepository.findByCategory(categoryRepository.findById(dto.getCoupon().getCategoryId()).get());
-            }
-            if(coupon == null){
-                throw new NotFoundException("The coupon you entered does not exist");
-            }
-            if(coupon.getDiscountPercent() != dto.getCoupon().getDiscountPercent()){
-                throw new BadRequestException("Invalid coupon") ;
-            }
-            int discountPercent = OrderUtility.getDiscountPercentage(dto);
-            if (discountPercent < MIN_PERCENTAGE_VALUE || discountPercent > MAX_PERCENTAGE_VALUE) {
-                throw new BadRequestException("Invalid coupon");
-            }
-            if (dto.getCoupon().getStartDate() != null) {
-                LocalDateTime startDate = this.validateDate(dto.getCoupon().getStartDate());
-                if (LocalDateTime.now().isBefore(startDate)) {
-                    throw new BadRequestException("Invalid coupon");
-                }
-            }else{
-                throw new BadRequestException("Invalid coupon");
-            }
-            if (dto.getCoupon().getExpireDate() != null) {
-                LocalDateTime endDate = this.validateDate(dto.getCoupon().getExpireDate());
-                if (LocalDateTime.now().isAfter(endDate)) {
-                    throw new BadRequestException("Invalid coupon");
-                }
-            }
-        }
-        return coupon;
-    }
-
-    private void changeProductPrice(Product product, Product discountedProduct, Category discountedCategory, int discountPercentage){
-        if(discountedProduct != null) {
-            if(product.getFullName().equals(discountedProduct.getFullName())) {
+    private void changeProductPrice(Product product, Product discountedProduct, Category discountedCategory, int discountPercentage) {
+        if (discountedProduct != null) {
+            if (product.getFullName().equals(discountedProduct.getFullName())) {
                 OrderUtility.setDiscountedPrice(product, discountPercentage);
-            }else{
+            } else {
                 throw new BadRequestException("The entered coupon is not valid");
             }
-        }else{
-            if(discountedCategory != null){
-                if(product.getCategory().getName().equals(discountedCategory.getName())) {
+        }else {
+            if (discountedCategory != null) {
+                if (product.getCategory().getName().equals(discountedCategory.getName())) {
                     OrderUtility.setDiscountedPrice(product, discountPercentage);
                 } else {
                     throw new BadRequestException("The entered coupon is not valid");
                 }
-            } else {
+            }else {
                 throw new BadRequestException("The entered coupon is not valid");
             }
         }

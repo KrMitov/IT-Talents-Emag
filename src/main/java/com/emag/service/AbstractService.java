@@ -1,12 +1,14 @@
 package com.emag.service;
 
 import com.emag.exceptions.BadRequestException;
+import com.emag.exceptions.NotFoundException;
 import com.emag.model.pojo.*;
 import com.emag.model.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 public abstract class AbstractService {
 
@@ -104,5 +106,13 @@ public abstract class AbstractService {
         }catch (Exception e){
             throw new BadRequestException("Date is not valid");
         }
+    }
+
+    protected Coupon findCouponById(int id){
+        Optional<Coupon> couponFromDb = couponRepository.findById(id);
+        if(couponFromDb.isEmpty()){
+            throw new NotFoundException("Coupon not found");
+        }
+        return couponFromDb.get();
     }
 }
