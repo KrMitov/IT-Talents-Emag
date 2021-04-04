@@ -82,8 +82,10 @@ public class ProductDAO {
             }
         }
         query.append(";");
-        List<String> splitParams = new ArrayList<>(Arrays.asList(queryParams.toString().split(",")));
-
+        List<String> splitParams = new ArrayList<>();
+        if (queryParams.length() != 0){
+            splitParams.addAll(Arrays.asList(queryParams.toString().split(",")));
+        }
         try( Connection connection = jdbcTemplate.getDataSource().getConnection();
              PreparedStatement statement = connection.prepareStatement(query.toString())){
             int paramsCount = 0;

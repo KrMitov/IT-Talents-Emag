@@ -8,6 +8,7 @@ import org.apache.tika.Tika;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.transaction.Transactional;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,6 +19,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Service
+@Transactional
 public class ProductImageService extends AbstractService{
 
     public ProductWithImagesDTO uploadProductImages(int id, MultipartFile[] receivedFiles) throws IOException {
