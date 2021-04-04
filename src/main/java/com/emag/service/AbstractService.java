@@ -27,7 +27,13 @@ public abstract class AbstractService {
     @Autowired
     protected UserImageRepository userImageRepository;
     @Autowired
-    CouponRepository couponRepository;
+    protected CouponRepository couponRepository;
+    @Autowired
+    protected CartRepository cartRepository;
+    @Autowired
+    protected OrderRepository orderRepository;
+    @Autowired
+    protected OrderedProductsRepository orderedProductsRepository;
     @Value("${file.path}")
     protected String filePath;
     protected static final String[] ACCEPTED_IMAGE_MIME_TYPES = {"image/png", "image/jpeg"};
@@ -81,6 +87,14 @@ public abstract class AbstractService {
             throw new BadRequestException("Product image with id " + id + " does not exist");
         }
         return productImage;
+    }
+
+    protected  Role getRoleIfExists(int id){
+        Role role = roleRepository.findById(id).orElse(null);
+        if (role == null){
+            throw new BadRequestException("Role does not exist");
+        }
+        return role;
     }
 
     protected LocalDateTime validateDate(String date){

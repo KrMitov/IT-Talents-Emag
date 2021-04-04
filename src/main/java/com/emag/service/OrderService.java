@@ -6,15 +6,13 @@ import com.emag.model.dto.orderdto.CreateOrderDTO;
 import com.emag.model.dto.orderdto.OrderConfirmationDTO;
 import com.emag.model.dto.produtcdto.RequestProductDTO;
 import com.emag.model.pojo.*;
-import com.emag.model.repository.*;
 import com.emag.util.OrderUtility;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.sql.Array;
+import java.sql.SQLException;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -23,25 +21,14 @@ public class OrderService extends AbstractService{
 
     private static final int MIN_PERCENTAGE_VALUE = 1;
     private static final int MAX_PERCENTAGE_VALUE = 95;
-    @Autowired
-    OrderRepository orderRepository;
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    ProductRepository productRepository;
-    @Autowired
-    CategoryRepository categoryRepository;
-    @Autowired
-    CouponRepository couponRepository;
+
     @Autowired
     CartService cartService;
-    @Autowired
-    OrderedProductsRepository orderedProductsRepository;
     @Autowired
     ProductService productService;
 
     @Transactional
-    public OrderConfirmationDTO createOrder(CreateOrderDTO dto){
+    public OrderConfirmationDTO createOrder(CreateOrderDTO dto) throws SQLException {
         OrderUtility.validateOrder(dto);
         User user = getUserIfExists(dto.getUserId());
         Order order = new Order();

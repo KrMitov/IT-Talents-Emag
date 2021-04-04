@@ -15,12 +15,10 @@ public class FileCreator {
     @Value("${statistics.file}")
     private String filePath;
 
-    public void addTextToFile(String text) {
+    public void addTextToFile(String text) throws IOException {
         File file = new File(filePath, "statistics.txt");
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(file, true))) {
             writer.write(text);
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
 

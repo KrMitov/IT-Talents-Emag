@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.sql.SQLException;
 
 @RestController
 public class CartController extends AbstractController{
@@ -26,7 +27,7 @@ public class CartController extends AbstractController{
     }
 
     @DeleteMapping("/cart")
-    public UserCartDTO removeProduct(@RequestBody @Valid CartDTO dto,HttpSession session){
+    public UserCartDTO removeProduct(@RequestBody @Valid CartDTO dto,HttpSession session) throws SQLException {
         sessionManager.userVerification(session,dto.getUserId());
         return cartService.removeProductFromCart(dto.getProductId(),dto.getUserId());
     }

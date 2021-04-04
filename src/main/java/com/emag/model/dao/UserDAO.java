@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import java.io.IOException;
 import java.sql.*;
 
 @Component
@@ -15,7 +16,7 @@ public class UserDAO {
     @Autowired
     FileCreator fileCreator;
 
-    public void getUsersWhoOrdered(String date) {
+    public void getUsersWhoOrdered(String date) throws SQLException, IOException {
         Timestamp startDate = Timestamp.valueOf(date + " 00:00:00");
         Timestamp endDate = Timestamp.valueOf(date + " 23:59:59");
         String sql = "select email,coalesce(nickname,'no available username') as nickname,o.created_at from users u join orders o " +
@@ -32,12 +33,10 @@ public class UserDAO {
                         rs.getTimestamp("created_at") + "\n");
             }
             fileCreator.addTextToFile(result.toString());
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
         }
     }
 
-    public void getUsersByEmailAndProducts(String email, int warrantyYears, double minProductPrice, double maxProductPrice) {
+    public void getUsersByEmailAndProducts(String email, int warrantyYears, double minProductPrice, double maxProductPrice) throws SQLException, IOException {
         String sql = "select email,warranty_years,p.full_name,regular_price from " +
                 "users u join orders o on u.id = o.user_id " +
                 "join orders_have_products op on o.id = op.order_id " +
@@ -58,12 +57,10 @@ public class UserDAO {
                         + " product_name " + rs.getString("full_name") + " product price: " + rs.getDouble("regular_price") + "\n");
             }
             fileCreator.addTextToFile(result.toString());
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
         }
     }
 
-    public void getOrdersByCity(String city, int minNumberOfOrders) {
+    public void getOrdersByCity(String city, int minNumberOfOrders) throws SQLException, IOException {
         String sql = "select u.id,email,count(*) as orders,city from users u join saved_addresses s " +
                 "on u.id = s.user_id " +
                 "join addresses a " +
@@ -83,12 +80,10 @@ public class UserDAO {
                         rs.getInt("orders") + ", city: " + rs.getString("city") + "\n");
             }
             fileCreator.addTextToFile(result.toString());
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
         }
     }
 
-    public void printUsersWithMostOrders(int numberOfUsers) {
+    public void printUsersWithMostOrders(int numberOfUsers) throws SQLException, IOException {
         String sql = " select u.id,email,count(*) as orders from users u join orders o " +
                 "on u.id = o.user_id " +
                 "group by u.id " +
@@ -104,8 +99,6 @@ public class UserDAO {
                         + rs.getInt("orders") + "\n");
             }
             fileCreator.addTextToFile(result.toString());
-        } catch (SQLException throwables) {
-            throwables.printStackTrace();
         }
     }
 

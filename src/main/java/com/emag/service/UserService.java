@@ -2,7 +2,6 @@ package com.emag.service;
 
 import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
-import com.emag.model.dao.UserCartDAO;
 import com.emag.model.dao.UserDAO;
 import com.emag.model.dto.addressdto.AddressDTO;
 import com.emag.model.dto.produtcdto.LikedProductsForUserDTO;
@@ -25,15 +24,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
-import javax.validation.Valid;
 import java.io.*;
 import java.nio.file.Files;
 import java.sql.Date;
-import java.sql.Timestamp;
+import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class UserService extends AbstractService {
@@ -57,7 +54,7 @@ public class UserService extends AbstractService {
         if (!UserUtility.passwordsMatch(dto)) {
             throw new BadRequestException("Passwords do not match!");
         }
-        Role role = roleRepository.findById(USER_ROLE_ID).get();
+        Role role = getRoleIfExists(USER_ROLE_ID);
         PasswordEncoder encoder = new BCryptPasswordEncoder();
         UserUtility.validateName(dto.getName());
         dto.setPassword(encoder.encode(password));
@@ -164,8 +161,7 @@ public class UserService extends AbstractService {
         try (OutputStream os = new FileOutputStream(physicalFile)){
             os.write(file.getBytes());
             userImage.setUrl(physicalFile.getAbsolutePath());
-            Optional<User> userFromDb = userRepository.findById(userId);
-            User user = userFromDb.get();
+            User user = getUserIfExists(userId);
             userImage = userImageRepository.save(userImage);
             user.setImage(userImage);
             userRepository.save(user);
@@ -232,7 +228,7 @@ public class UserService extends AbstractService {
     }
 
     @Scheduled(cron = "0 * * * * *")
-    public void printStatistics(){
+    public void printStatistics() throws IOException, SQLException {
       userDAO.getUsersWhoOrdered("2021-03-31");
       userDAO.getOrdersByCity("Burgas",2);
       userDAO.getUsersByEmailAndProducts("abv.bg",2,1000,3000);

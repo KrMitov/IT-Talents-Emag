@@ -11,7 +11,7 @@ import javax.validation.constraints.Size;
 @Setter
 @NoArgsConstructor
 public class RegisterRequestUserDTO {
-    @NotNull
+    @NotNull(message = "Email must not be null")
     @Size(min=12,max=25,message = "Incorrect email")
     private String email;
     @NotNull(message = "Password must not be null")

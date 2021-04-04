@@ -14,8 +14,8 @@ import javax.validation.constraints.NotNull;
 public class CreateOrderDTO {
     @NotNull(message = "You need to select products to make an order")
     private int[] productsId;
-    @NotNull
-    @Min(value = 1,message = "You need to add user id")
+    @NotNull(message = "You need to add user id")
+    @Min(value = 1,message = "You need to add a valid user id")
     private int userId;
     @Valid
     private CouponDTO coupon;

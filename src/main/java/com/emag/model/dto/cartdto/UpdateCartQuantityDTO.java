@@ -20,6 +20,6 @@ public class UpdateCartQuantityDTO {
     private int productId;
     @NotNull
     @Min(value=1, message="You have to enter correct quantity")
-    @Max(value=50, message="You have to enter correct quantity")
+    @Max(value=50, message="You have to enter correct quantity - max cart quantity is 50")
     private int quantity;
 }

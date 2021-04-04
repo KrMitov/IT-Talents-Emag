@@ -1,36 +1,25 @@
 package com.emag.service;
 
-import com.emag.exceptions.AuthenticationException;
 import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
 import com.emag.model.dao.UserCartDAO;
 import com.emag.model.dto.produtcdto.ProductDTO;
-import com.emag.model.dto.produtcdto.ProductsFromCartForUserDTO;
 import com.emag.model.dto.userdto.UserCartDTO;
 import com.emag.model.pojo.Product;
 import com.emag.model.pojo.User;
 import com.emag.model.pojo.UserCart;
 
 import com.emag.model.pojo.UserCartsKey;
-import com.emag.model.repository.CartRepository;
-import com.emag.model.repository.ProductRepository;
-import com.emag.model.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.sql.SQLException;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CartService extends AbstractService{
 
-    @Autowired
-    CartRepository cartRepository;
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    ProductRepository productRepository;
     @Autowired
     UserCartDAO userCartDAO;
     private static final int PRODUCT_MIN_QUANTITY = 1;
@@ -41,9 +30,8 @@ public class CartService extends AbstractService{
         UserCartsKey primaryKey = new UserCartsKey();
         primaryKey.setUserId(userId);
         primaryKey.setProductId(productId);
-        Optional<User> userFromDb = userRepository.findById(userId);
         Product product = getProductIfExists(productId);
-        User user = userFromDb.get();
+        User user = getUserIfExists(userId);
         if(cartContainsProduct(user,product)){
            UserCart userCart = this.increaseQuantityOfProduct(user,product);
            cartRepository.save(userCart);
@@ -60,9 +48,9 @@ public class CartService extends AbstractService{
         }
     }
 
-    public UserCartDTO removeProductFromCart(int productId,int userId){
-        User user = userRepository.findById(userId).get();
-        Product product = productRepository.findById(productId).get();
+    public UserCartDTO removeProductFromCart(int productId,int userId) throws SQLException {
+        User user = getUserIfExists(userId);
+        Product product = getProductIfExists(productId);
         if (cartContainsProduct(user, product)){
             userCartDAO.removeProductFromCart(productId, userId);
             int quantity = this.getQuantityOfProduct(user,product);
@@ -82,9 +70,8 @@ public class CartService extends AbstractService{
         UserCartsKey primaryKey = new UserCartsKey();
         primaryKey.setProductId(productId);
         primaryKey.setUserId(userId);
-        Optional<User> userFromDb = userRepository.findById(userId);
         Product product = getProductIfExists(productId);
-        User user = userFromDb.get();
+        User user = getUserIfExists(userId);
         if(cartContainsProduct(user,product)) {
             UserCart userCart = this.updateQuantityOfProduct(user, product,quantity);
             cartRepository.save(userCart);

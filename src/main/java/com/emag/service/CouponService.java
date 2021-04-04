@@ -6,11 +6,9 @@ import com.emag.model.dto.coupondto.CouponDTO;
 import com.emag.model.pojo.Category;
 import com.emag.model.pojo.Coupon;
 import com.emag.model.pojo.Product;
-import org.apache.tomcat.jni.Local;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -27,10 +25,10 @@ public class CouponService extends AbstractService{
             coupon.setExpireDate(Timestamp.valueOf(expireDate));
         }
         if(dto.getProductId()!=0) {
-            Product product = productRepository.findById(dto.getProductId()).get();
+            Product product = getProductIfExists(dto.getProductId());
             coupon.setProductHasCoupon(product);
         }else {
-            Category category = categoryRepository.findById(dto.getCategoryId()).get();
+            Category category = getCategoryIfExists(dto.getCategoryId());
             coupon.setCategory(category);
         }
         couponRepository.save(coupon);

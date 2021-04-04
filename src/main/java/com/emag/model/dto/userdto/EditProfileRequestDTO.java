@@ -20,9 +20,9 @@ public class EditProfileRequestDTO {
     private String confirmNewPassword;
     @NotNull(message = "Phone number can not be null")
     private String phoneNumber;
-    @NotNull
+    @NotNull(message = "Birthday can not be null")
     private String birthDate;
-    @Valid
+    @NotNull(message = "Address can not be null")
     private AddressDTO address;
 
 }

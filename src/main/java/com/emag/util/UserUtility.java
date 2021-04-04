@@ -1,17 +1,13 @@
 package com.emag.util;
 
 import com.emag.exceptions.BadRequestException;
-import com.emag.exceptions.NotFoundException;
 import com.emag.model.dto.addressdto.AddressDTO;
 import com.emag.model.dto.registerdto.RegisterRequestUserDTO;
 import com.emag.model.pojo.Address;
-import com.emag.model.pojo.Coupon;
-import com.emag.model.pojo.Product;
 import com.emag.model.pojo.User;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 public class UserUtility {
 
@@ -61,13 +57,9 @@ public class UserUtility {
         String password = dto.getPassword().trim();
         String confirmPassword = dto.getConfirmPassword().trim();
         if (password == null || confirmPassword == null) {
-            throw new BadRequestException("You have to enter a vaild password");
+            throw new BadRequestException("You have to enter a valid password");
         }
-        if (dto.getPassword().equals(dto.getConfirmPassword())) {
-            return true;
-        } else {
-            return false;
-        }
+        return dto.getPassword().equals(dto.getConfirmPassword());
     }
 
     public static boolean passwordIsValid(String password) {

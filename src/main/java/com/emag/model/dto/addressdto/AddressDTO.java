@@ -21,7 +21,7 @@ public class AddressDTO {
     private String neighborhood;
     @NotNull(message = "Street can not be null")
     private String street;
-    @NotNull(message = "Street nubmer can not be null")
+    @NotNull(message = "Street number can not be null")
     private String streetNumber;
 
     public AddressDTO(Address address){

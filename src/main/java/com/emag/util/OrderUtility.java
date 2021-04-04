@@ -27,7 +27,7 @@ public class OrderUtility {
                 break;
             }
         }
-        if (isFound == false) {
+        if (!isFound) {
             throw new NotFoundException("Product not found in user's cart");
         }
     }

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
 import javax.validation.Valid;
+import java.sql.SQLException;
 
 @RestController
 public class OrderController extends AbstractController{
@@ -21,7 +22,7 @@ public class OrderController extends AbstractController{
     SessionManager sessionManager;
 
     @PostMapping("/orders")
-    public OrderConfirmationDTO createOrder(@RequestBody @Valid CreateOrderDTO dto, HttpSession session){
+    public OrderConfirmationDTO createOrder(@RequestBody @Valid CreateOrderDTO dto, HttpSession session) throws SQLException {
         sessionManager.userVerification(session,dto.getUserId());
         return orderService.createOrder(dto);
     }
