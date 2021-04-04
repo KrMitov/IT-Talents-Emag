@@ -14,8 +14,8 @@ import com.emag.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 import java.io.IOException;
 
 @RestController
@@ -27,13 +27,13 @@ public class UserController extends AbstractController{
     private SessionManager sessionManager;
 
     @PostMapping("/users")
-    public RegisterResponseUserDTO register(@RequestBody RegisterRequestUserDTO dto, HttpSession session){
+    public RegisterResponseUserDTO register(@RequestBody @Valid RegisterRequestUserDTO dto, HttpSession session){
         sessionManager.loggedInVerification(session);
         return userService.register(dto);
     }
 
     @PostMapping("/users/login")
-    public UserWithoutPasswordDTO login(@RequestBody LoginRequestUserDTO dto, HttpSession session){
+    public UserWithoutPasswordDTO login(@RequestBody @Valid LoginRequestUserDTO dto, HttpSession session){
         sessionManager.loggedInVerification(session);
         UserWithoutPasswordDTO response = userService.login(dto);
         sessionManager.loginUser(session,response.getId());
@@ -54,7 +54,7 @@ public class UserController extends AbstractController{
     }
 
     @PutMapping("/users/{id}")
-    public UserWithoutPasswordDTO editUser(@PathVariable int id, @RequestBody EditProfileRequestDTO dto, HttpSession session){
+    public UserWithoutPasswordDTO editUser(@PathVariable int id, @RequestBody @Valid EditProfileRequestDTO dto, HttpSession session){
         sessionManager.userVerification(session, id);
         return userService.editUser(id,dto);
     }

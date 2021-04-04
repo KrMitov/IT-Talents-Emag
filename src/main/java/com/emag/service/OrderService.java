@@ -4,12 +4,14 @@ import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
 import com.emag.model.dao.UserOrderDAO;
 import com.emag.model.dto.orderdto.CreateOrderDTO;
+import com.emag.model.dto.produtcdto.RequestProductDTO;
 import com.emag.model.pojo.*;
 import com.emag.model.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
+import java.sql.Array;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,12 +38,13 @@ public class OrderService extends AbstractService{
     UserOrderDAO userOrderDAO;
     @Autowired
     OrderedProductsRepository orderedProductsRepository;
+    @Autowired
+    ProductService productService;
 
     @Transactional
     public String createOrder(CreateOrderDTO dto){
         this.validateOrder(dto);
-//        this.validateCoupon(dto);
-        User user = findUserById(dto.getUserId());
+        User user = getUserIfExists(dto.getUserId());
         Order order = new Order();
         order.setCreatedAt(Timestamp.valueOf(LocalDateTime.now()));
         order.setUserHasOrder(user);
@@ -54,27 +57,29 @@ public class OrderService extends AbstractService{
             discountedCategory = findCategoryById(dto.getCoupon().getCategoryId());
         }
         int discountPercentage = dto.getCoupon().getDiscountPercent();
-        List<Product> products = new ArrayList<>();
         int[] requestedProducts = dto.getProductsId();
         HashMap<Product,Integer> productQuantities = new HashMap<>();
         for (int i = 0; i < requestedProducts.length; i++) {
             Product product = findProductById(requestedProducts[i]);
-            this.checkCartForProduct(user,product);
-            int quantityOfProduct = this.getQuantityOfProduct(user,product);
-            productQuantities.put(product,quantityOfProduct);
-            if(!isCouponEmpty(dto)){
-                Coupon coupon =this.validateCoupon(dto);
-                if(this.couponIsValidForProduct(coupon,product)) {
+            this.checkCartForProduct(user, product);
+            int quantityOfProduct = this.getQuantityOfProduct(user, product);
+            productQuantities.put(product, quantityOfProduct);
+            if (!isCouponEmpty(dto)) {
+                Coupon coupon = this.validateCoupon(dto);
+                if (this.couponIsValidForProduct(coupon, product)) {
                     changeProductPrice(product, discountedProduct, discountedCategory, discountPercentage);
+                }else{
+                    throw new BadRequestException("Coupon is not valid for "+product.getFullName());
                 }
             }
             int productId = product.getId();
-            cartService.removeProductFromCart(productId,user.getId());
-            products.add(product);
+            cartService.removeProductFromCart(productId, user.getId());
+            RequestProductDTO editedProduct = new RequestProductDTO();
+            editedProduct.setQuantity(product.getQuantity() - quantityOfProduct);
+            productService.editProduct(product.getId(), editedProduct);
         }
-
+        orderRepository.save(order);
         insertOrderedQuantity(order,productQuantities);
-//        orderRepository.save(order);
         return "Order created successfully";
     }
 
@@ -93,7 +98,6 @@ public class OrderService extends AbstractService{
             orderedProductsRepository.save(orderedProduct);
         }
     }
-
 
     private void setDiscountedPrice(Product product,int discountPercentage){
         double regularPrice = product.getRegularPrice();
@@ -139,23 +143,26 @@ public class OrderService extends AbstractService{
                 coupon = couponRepository.findByCategory(categoryRepository.findById(dto.getCoupon().getCategoryId()).get());
             }
             if(coupon == null){
-                throw new BadRequestException("The coupon you entered does not exist");
+                throw new NotFoundException("The coupon you entered does not exist");
+            }
+            if(coupon.getDiscountPercent() != dto.getCoupon().getDiscountPercent()){
+                throw new BadRequestException("Invalid coupon - entered discount percent is not valid") ;
             }
             int discountPercent = this.getDiscountPercentage(dto);
             if (discountPercent < MIN_PERCENTAGE_VALUE || discountPercent > MAX_PERCENTAGE_VALUE) {
                 throw new BadRequestException("Invalid coupon");
             }
             if (dto.getCoupon().getStartDate() != null) {
-                LocalDate startDate = dto.getCoupon().getStartDate().toLocalDateTime().toLocalDate();
-                if (LocalDate.now().isBefore(startDate)) {
+                LocalDateTime startDate = this.validateDate(dto.getCoupon().getStartDate());
+                if (LocalDateTime.now().isBefore(startDate)) {
                     throw new BadRequestException("Invalid coupon");
                 }
             }else{
                 throw new BadRequestException("Invalid coupon");
             }
-            if (dto.getCoupon().getEndDate() != null) {
-                LocalDate endDate = dto.getCoupon().getEndDate().toLocalDateTime().toLocalDate();
-                if (LocalDate.now().isAfter(endDate)) {
+            if (dto.getCoupon().getExpireDate() != null) {
+                LocalDateTime endDate = this.validateDate(dto.getCoupon().getExpireDate());
+                if (LocalDateTime.now().isAfter(endDate)) {
                     throw new BadRequestException("Invalid coupon");
                 }
             }
@@ -168,21 +175,13 @@ public class OrderService extends AbstractService{
             throw new BadRequestException("You have to select products to make an order");
         }
     }
-    private User findUserById(int id) {
-        if (userRepository.findById(id).isEmpty()) {
-            throw new NotFoundException("User not found!");
-        } else {
-            Optional<User> userFromDb = userRepository.findById(id);
-            return userFromDb.get(); // return userRository...
-        }
-    }
 
     private Product findProductById(int productId){
-            Optional<Product> product = productRepository.findById(productId);
-            if (product.isEmpty()) {
-                throw new NotFoundException("Product not found");
-            }
-            return product.get();
+        Optional<Product> product = productRepository.findById(productId);
+        if (product.isEmpty()) {
+            throw new NotFoundException("Product not found");
+        }
+        return product.get();
     }
 
     private Category findCategoryById(int categoryId){
@@ -197,7 +196,7 @@ public class OrderService extends AbstractService{
         boolean result = false;
         if(dto.getCoupon().getDiscountPercent() == 0 && dto.getCoupon().getProductId() == 0
         && dto.getCoupon().getCategoryId() == 0 && dto.getCoupon().getStartDate() == null
-        && dto.getCoupon().getEndDate() == null){
+        && dto.getCoupon().getExpireDate() == null){
             result = true;
         }
         return result;
@@ -245,7 +244,5 @@ public class OrderService extends AbstractService{
         }
         return result;
     }
-
-
 
 }

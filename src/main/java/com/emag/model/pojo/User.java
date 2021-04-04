@@ -69,6 +69,7 @@ import java.util.List;
         )
         private List<Review> likedReviews;
        @OneToMany(mappedBy = "userHasOrder")
+       @JsonManagedReference
        private List<Order> orders;
 
            public User(RegisterRequestUserDTO registerRequestUserDTO){

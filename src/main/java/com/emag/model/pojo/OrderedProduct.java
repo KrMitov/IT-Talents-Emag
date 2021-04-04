@@ -23,6 +23,7 @@ public class OrderedProduct {
     @MapsId("productId")
     @JoinColumn(name = "product_id")
     Product product;
+    @Column(name = "quantity")
     int quantity;
 
 }

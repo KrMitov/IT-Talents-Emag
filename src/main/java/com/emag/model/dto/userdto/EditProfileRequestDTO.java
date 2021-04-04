@@ -4,19 +4,22 @@ import com.emag.model.dto.addressdto.AddressDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import javax.validation.constraints.Past;
-import javax.validation.constraints.Size;
-import java.sql.Timestamp;
+import javax.validation.constraints.NotNull;
 
 @Getter
 @Setter
 @NoArgsConstructor
 public class EditProfileRequestDTO {
+    @NotNull(message = "Password can not be null")
     private String oldPassword;
+    @NotNull(message = "Password can not be null")
     private String newPassword;
+    @NotNull(message = "Password can not be null")
     private String confirmNewPassword;
+    @NotNull(message = "Phone number can not be null")
     private String phoneNumber;
-    private Timestamp birthDate;
+    @NotNull
+    private String birthDate;
     private AddressDTO address;
+
 }

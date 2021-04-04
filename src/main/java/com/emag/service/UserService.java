@@ -15,6 +15,7 @@ import com.emag.model.dto.userdto.LoginRequestUserDTO;
 import com.emag.model.dto.userdto.UserReviewsDTO;
 import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
 import com.emag.model.pojo.*;
+import com.emag.util.UserUtility;
 import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.transaction.Transactional;
+import javax.validation.Valid;
 import java.io.*;
 import java.nio.file.Files;
 import java.sql.Date;
@@ -45,19 +47,19 @@ public class UserService extends AbstractService {
         if (userRepository.findByEmail(email) != null) {
             throw new BadRequestException("Email already exists!");
         }
-        if (!emailIsValid(email)) {
+        if (!UserUtility.emailIsValid(email)) {
             throw new BadRequestException("Incorrect email");
         }
-        if (!passwordsMatch(dto)) {
+        String password = dto.getPassword();
+        if (!UserUtility.passwordIsValid(password)) {
+            throw new BadRequestException("Password is too weak!");
+        }
+        if (!UserUtility.passwordsMatch(dto)) {
             throw new BadRequestException("Passwords do not match!");
         }
         Role role = roleRepository.findById(USER_ROLE_ID).get();
         PasswordEncoder encoder = new BCryptPasswordEncoder();
-        String password = dto.getPassword();
-        if (!passwordIsValid(password)) {
-            throw new BadRequestException("Password is too weak!");
-        }
-        this.validateName(dto.getName());
+        UserUtility.validateName(dto.getName());
         dto.setPassword(encoder.encode(password));
         User user = new User(dto);
         user.setRole(role);
@@ -81,18 +83,18 @@ public class UserService extends AbstractService {
     }
 
     public UserWithoutPasswordDTO findById(int id) {
-        User user = findUserById(id);
+        User user = getUserIfExists(id);
         return new UserWithoutPasswordDTO(user);
     }
 
     public UserWithoutPasswordDTO editUser(int id, EditProfileRequestDTO dto) {
-        User user = findUserById(id);
-        if (dto.getOldPassword().length() > 1) {
+        User user = getUserIfExists(id);
+        if (dto.getOldPassword().length() > 0){
             String password = dto.getOldPassword();
             PasswordEncoder encoder = new BCryptPasswordEncoder();
             if (encoder.matches(password, user.getPassword())) {
                 if (dto.getNewPassword().equals(dto.getConfirmNewPassword())) {
-                    if(!this.passwordIsValid(dto.getNewPassword())){
+                    if(!UserUtility.passwordIsValid(dto.getNewPassword())){
                         throw new BadRequestException("Enter correct new password");
                     }
                     user.setPassword(encoder.encode(dto.getNewPassword()));
@@ -104,44 +106,44 @@ public class UserService extends AbstractService {
                 throw new BadRequestException("Wrong password!");
             }
         }
-        if (dto.getPhoneNumber() != null) {
-            if(dto.getPhoneNumber().length()>0) {
-                String phoneNumber = dto.getPhoneNumber();
-                this.validatePhoneNumber(phoneNumber);
-                user.setPhoneNumber(phoneNumber);
-                user = userRepository.save(user);
-            }
+        if (dto.getPhoneNumber() != null && dto.getPhoneNumber().length()>0){
+            String phoneNumber = dto.getPhoneNumber();
+            UserUtility.validatePhoneNumber(phoneNumber);
+            user.setPhoneNumber(phoneNumber);
+            user = userRepository.save(user);
         }
 
-        if (dto.getBirthDate() != null) {
-            LocalDate birthDate = this.validateDate(dto.getBirthDate());
+        if (dto.getBirthDate() != null && dto.getBirthDate().length()>0){
+            LocalDate birthDate = UserUtility.validateBirthDate(dto.getBirthDate());
             Date sqlDate = Date.valueOf(birthDate);
             user.setBirthDate(sqlDate);
             user = userRepository.save(user);
         }
 
         if (dto.getAddress() != null) {
-            Address address = validateAddress(dto.getAddress());
-            checkIfAddressExists(address, user);
-            address = addressRepository.save(address);
-            user.getAddresses().add(address);
-            user = userRepository.save(user);
+            if(!UserUtility.addressIsEmpty(dto.getAddress())) {
+                Address address = validateAddress(dto.getAddress());
+                UserUtility.checkIfAddressExists(address, user);
+                address = addressRepository.save(address);
+                user.getAddresses().add(address);
+                user = userRepository.save(user);
+            }
         }
         return new UserWithoutPasswordDTO(user);
     }
 
     public LikedProductsForUserDTO getLikedProducts(int userId) {
-        User user = findUserById(userId);
+        User user = getUserIfExists(userId);
         return new LikedProductsForUserDTO(user);
     }
 
     public UserOrdersDTO getOrders(int userId) {
-        User user = findUserById(userId);
+        User user = getUserIfExists(userId);
         return new UserOrdersDTO(user);
     }
 
     public ProductsFromCartForUserDTO getProductsFromCart(int id) {
-        User user = findUserById(id);
+        User user = getUserIfExists(id);
         return new ProductsFromCartForUserDTO(user);
     }
 
@@ -172,7 +174,7 @@ public class UserService extends AbstractService {
     }
 
     public byte[] downloadImage(int userId) throws IOException {
-        User user = findUserById(userId);
+        User user = getUserIfExists(userId);
         if (user.getImage() == null) {
             throw new NotFoundException("User does not have a profile picture");
         }
@@ -182,128 +184,44 @@ public class UserService extends AbstractService {
     }
 
     public UserReviewsDTO getReviews(int userId) {
-        User user = findUserById(userId);
+        User user = getUserIfExists(userId);
         return new UserReviewsDTO(user);
-    }
-
-    private boolean emailIsValid(String email){
-        if(email == null){
-            throw new BadRequestException("You have to enter a valid email");
-        }
-        boolean result = false;
-        boolean emailSymbolFound = false;
-        String specialCharacters = "#?!@$%^&*-:'{}+_()<>|[]";
-        //Letters, numbers and "_","." before "@" symbol
-        String regex = "^[A-Za-z0-9+_.]+@(.+)$";
-        if (email.matches(regex)) {
-            int startCharacter = 0;
-            for (int i = 0; i < email.length(); i++) {
-                if (email.charAt(i) == '@') {
-                    if(!emailSymbolFound) {
-                        startCharacter = i;
-                        emailSymbolFound = true;
-                    }
-                }
-            }
-            for (int i = startCharacter + 1; i < email.length(); i++) {
-                char character = email.charAt(i);
-                if (!specialCharacters.contains(String.valueOf(character)) && !Character.isDigit(character)) {
-                    result = true;
-                } else {
-                    result = false;
-                    break;
-                }
-            }
-        }
-        return result;
-    }
-
-   private boolean passwordIsValid(String password){
-       if (password == null) {
-           throw new BadRequestException("You have to enter a valid password");
-       }
-       boolean result = false;
-       //At least one upper case, one lower case,one digit,one special character minimum eight characters
-       String regex = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$";
-       if (password.matches(regex)) {
-           result = true;
-       }
-       return result;
-   }
-
-   private boolean passwordsMatch(RegisterRequestUserDTO dto){
-        String password =dto.getPassword();
-        String confirmPassword = dto.getConfirmPassword();
-        if(password == null || confirmPassword == null){
-            throw new BadRequestException("You have to enter a vaild password");
-        }
-      if(dto.getPassword().equals(dto.getConfirmPassword())){
-          return  true;
-      }else {
-          return false;
-      }
-   }
-
-    private void validatePhoneNumber(String phoneNumber){
-        if (phoneNumber.length() > 0 && phoneNumber.length() < 10) {
-            throw new BadRequestException("Wrong phone number");
-        }
-        for (int i = 0; i < phoneNumber.length(); i++) {
-               if(!Character.isDigit(phoneNumber.charAt(i))){
-                   throw new BadRequestException("Wrong phone number");
-               }
-        }
-    }
-
-    private LocalDate validateDate(Timestamp date){
-            LocalDate birthDate = date.toLocalDateTime().toLocalDate();
-            if(birthDate.isBefore(LocalDate.now().minusYears(10)) && birthDate.isAfter(LocalDate.now().minusYears(100))) {
-                return birthDate;
-            }
-             else {
-                throw new BadRequestException("Wrong birth date");
-            }
-    }
-
-    private void validateName(String name) {
-        if (name.length() <= 3) {
-            throw new BadRequestException("Enter correct name");
-        }
-        for (int i = 0; i < name.length(); i++) {
-            char character = name.charAt(i);
-            if (Character.isDigit(character)) {
-                throw new BadRequestException("Enter correct name");
-            }
-        }
     }
 
     private Address validateAddress(AddressDTO addressDTO) {
         if (addressDTO.getCountry() != null && addressDTO.getCountry().length() > 0) {
-            checkForDigitsAndSymbols(addressDTO.getCountry(), "You entered wrong country","digits and symbols");
+            checkForDigitsAndSymbols(addressDTO.getCountry(), "You entered a wrong country","digits and symbols");
         }
         if (addressDTO.getProvince() != null && addressDTO.getProvince().length() > 0) {
-            checkForDigitsAndSymbols(addressDTO.getProvince(), "You entered wrong province","digits and symbols");
+            checkForDigitsAndSymbols(addressDTO.getProvince(), "You entered a wrong province","digits and symbols");
         }
         if (addressDTO.getCity() != null && addressDTO.getCity().length() > 0) {
-            checkForDigitsAndSymbols(addressDTO.getCity(), "You entered wrong city","digits and symbols");
+            checkForDigitsAndSymbols(addressDTO.getCity(), "You entered a wrong city","digits and symbols");
         }
         if(addressDTO.getNeighborhood() !=null && addressDTO.getNeighborhood().length() > 0){
-            checkForDigitsAndSymbols(addressDTO.getNeighborhood(),"You entered wrong neighborhood","symbols");
+            checkForDigitsAndSymbols(addressDTO.getNeighborhood(),"You entered a wrong neighborhood","symbols");
         }
         if (addressDTO.getStreet() !=null && addressDTO.getStreet().length() > 0) {
-            if(addressDTO.getProvince() == null || addressDTO.getCity() == null){
+            if (addressDTO.getProvince() == null || addressDTO.getCity() == null) {
                 throw new BadRequestException("You have to enter province and city values");
-            }else {
-                if (addressDTO.getProvince().length()<4 || addressDTO.getCity().length()<3) {
+            } else {
+                if (addressDTO.getProvince().length() < 4 || addressDTO.getCity().length() < 3) {
                     throw new BadRequestException("You have to enter correct province and city values");
                 }
             }
-            if(addressDTO.getStreet().length()<5){
-                throw new BadRequestException("You have to enter correct street name");
+            if (addressDTO.getStreet().length() < 5) {
+                throw new BadRequestException("Enter correct street name");
             }
-            checkForDigitsAndSymbols(addressDTO.getStreet(), "You entered wrong street","digits and symbols");
+            checkForDigitsAndSymbols(addressDTO.getStreet(), "You entered wrong street", "digits and symbols");
         }
-        if(addressDTO.getStreetNumber() != null) {
+        if(addressDTO.getStreetNumber() != null){
+            if(addressDTO.getProvince() == null && addressDTO.getCity() == null && addressDTO.getStreet() == null){
+                throw new BadRequestException("Enter province , city and street");
+            }else {
+                if (addressDTO.getProvince().length() < 4 || addressDTO.getCity().length() < 3 || addressDTO.getStreet().length() < 5) {
+                    throw new BadRequestException("Enter valid province,city and street");
+                }
+            }
             for (int i = 0; i < addressDTO.getStreetNumber().length(); i++) {
                 if (!Character.isDigit(addressDTO.getStreetNumber().charAt(i))) {
                     throw new BadRequestException("You entered wrong street number");
@@ -311,17 +229,6 @@ public class UserService extends AbstractService {
             }
         }
         return new Address(addressDTO);
-    }
-
-    private void checkIfAddressExists(Address address, User user){
-        if(address.getCity() != null & address.getStreet() != null) {
-            List<Address> addresses = user.getAddresses();
-            for (Address saved : addresses) {
-                if (saved.getCity().equals(address.getCity()) && saved.getStreet().equals(address.getStreet())) {
-                    throw new BadRequestException("Address is already added");
-                }
-            }
-        }
     }
 
     private void checkForDigitsAndSymbols(String address, String message,String validateBy) {
@@ -339,15 +246,6 @@ public class UserService extends AbstractService {
                     throw new BadRequestException(message);
                 }
             }
-        }
-    }
-
-    private User findUserById(int id) {
-        if (userRepository.findById(id).isEmpty()) {
-            throw new NotFoundException("User not found!");
-        } else {
-            Optional<User> userFromDb = userRepository.findById(id);
-            return userFromDb.get();
         }
     }
 

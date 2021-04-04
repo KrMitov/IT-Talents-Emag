@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 
 @RestController
 public class OrderController extends AbstractController{
@@ -19,7 +20,7 @@ public class OrderController extends AbstractController{
     SessionManager sessionManager;
 
     @PostMapping("/orders")
-    public String createOrder(@RequestBody CreateOrderDTO dto, HttpSession session){
+    public String createOrder(@RequestBody @Valid CreateOrderDTO dto, HttpSession session){
         sessionManager.userVerification(session,dto.getUserId());
         return orderService.createOrder(dto);
     }

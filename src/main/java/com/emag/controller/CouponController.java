@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpSession;
+import javax.validation.Valid;
 
 @RestController
 public class CouponController extends AbstractController{
@@ -18,9 +19,9 @@ public class CouponController extends AbstractController{
     SessionManager sessionManager;
 
     @PostMapping("/coupons")
-    public String addCoupon(@RequestBody CouponDTO dto, HttpSession session){
+    public String addCoupon(@RequestBody @Valid CouponDTO dto, HttpSession session){
         sessionManager.adminVerification(session);
-       return couponService.createCoupon(dto);
+        return couponService.createCoupon(dto);
     }
 
 }

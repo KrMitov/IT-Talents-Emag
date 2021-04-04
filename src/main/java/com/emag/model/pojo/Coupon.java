@@ -8,7 +8,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.sql.Time;
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Getter
@@ -35,14 +37,8 @@ public class Coupon {
     @JsonBackReference
     private List<Order> ordersHaveCoupon;
 
-    public Coupon(CouponDTO dto,Product product,Category category){
+    public Coupon(CouponDTO dto){
         this.discountPercent = dto.getDiscountPercent();
-        this.productHasCoupon = product;
-        this.category = category;
-        this.startDate = Timestamp.valueOf(dto.getStartDate());
-        if(dto.getExpireDate().length()>0) {
-            this.expireDate = Timestamp.valueOf(dto.getExpireDate());
-        }
     }
 
 }

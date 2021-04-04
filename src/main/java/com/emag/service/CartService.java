@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class CartService {
+public class CartService extends AbstractService{
 
     @Autowired
     CartRepository cartRepository;
@@ -36,7 +36,7 @@ public class CartService {
         primaryKey.setUserId(userId);
         primaryKey.setProductId(productId);
         Optional<User> userFromDb = userRepository.findById(userId);
-        Product product = findProductById(productId);
+        Product product = getProductIfExists(productId);
         User user = userFromDb.get();
        if(cartContainsProduct(user,product)){
            UserCart userCart = this.increaseQuantityOfProduct(user,product);
@@ -54,7 +54,13 @@ public class CartService {
     }
 
     public String removeProductFromCart(int productId,int userId){
-        userCartDAO.removeProductFromCart(productId,userId);
+        User user = userRepository.findById(userId).get();
+        Product product = productRepository.findById(productId).get();
+        if (cartContainsProduct(user, product)) {
+            userCartDAO.removeProductFromCart(productId, userId);
+        } else {
+            throw new NotFoundException("The product was not found in user's cart");
+        }
         return "Product removed from cart successfully";
     }
 
@@ -66,7 +72,7 @@ public class CartService {
         primaryKey.setProductId(productId);
         primaryKey.setUserId(userId);
         Optional<User> userFromDb = userRepository.findById(userId);
-        Product product = findProductById(productId);
+        Product product = getProductIfExists(productId);
         User user = userFromDb.get();
         if(cartContainsProduct(user,product)) {
             UserCart userCart = this.updateQuantityOfProduct(user, product,quantity);
@@ -112,14 +118,6 @@ public class CartService {
             }
         }
         return userCart;
-    }
-
-    private Product findProductById(int productId){
-        Optional<Product> product = productRepository.findById(productId);
-        if(product.isEmpty()){
-            throw new NotFoundException("Product not found");
-        }
-        return product.get();
     }
 
 }

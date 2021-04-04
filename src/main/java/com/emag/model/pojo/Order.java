@@ -1,5 +1,6 @@
 package com.emag.model.pojo;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,22 +19,13 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    @Column(name = "user_id",insertable = false,updatable = false)
-    private int userId;
-    private Timestamp createdAt;
-//    @ManyToMany
-//    @JsonManagedReference
-//    @JoinTable(
-//            name = "orders_have_products",
-//            joinColumns = {@JoinColumn(name = "order_id")},
-//            inverseJoinColumns = {@JoinColumn(name = "product_id")}
-//    )
-//    private List<Product> productsInOrder;
-    @OneToMany(mappedBy = "order")
-    private List<OrderedProduct> productsQuantityInOrder;
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "user_id")
     private User userHasOrder;
+    private Timestamp createdAt;
+    @OneToMany(mappedBy = "order")
+    private List<OrderedProduct> productsQuantityInOrder;
     @ManyToOne
     @JoinColumn(name = "coupon_id")
     private Coupon coupon;

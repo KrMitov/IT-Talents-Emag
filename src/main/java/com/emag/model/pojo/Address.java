@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import javax.persistence.*;
 import java.util.List;
 
@@ -34,7 +33,9 @@ import java.util.List;
             this.city = address.getCity();
             this.neighborhood = address.getNeighborhood();
             this.street = address.getStreet();
-            this.number = address.getStreetNumber();
+            if(address.getStreetNumber().length() == 0) {
+                this.number = null;
+            }
         }
     }
 

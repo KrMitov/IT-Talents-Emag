@@ -6,7 +6,6 @@ import com.emag.model.pojo.Product;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +27,7 @@ public class ProductFromOrderDTO {
     private List<Integer> imagesIds;
     private int orderedQuantity;
 
-    public ProductFromOrderDTO(Product product) {
+    public ProductFromOrderDTO(Product product,int quantity) {
         this.id = product.getId();
         this.fullName = product.getFullName();
         this.brand = product.getBrand();
@@ -45,5 +44,6 @@ public class ProductFromOrderDTO {
         if (product.getProductImages() != null) {
             product.getProductImages().forEach(image -> imagesIds.add(image.getId()));
         }
+        this.orderedQuantity = quantity;
     }
 }

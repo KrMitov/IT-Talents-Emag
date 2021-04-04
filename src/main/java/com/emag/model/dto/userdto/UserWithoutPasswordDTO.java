@@ -1,12 +1,12 @@
 package com.emag.model.dto.userdto;
 
+import com.emag.model.dto.addressdto.AddressDTO;
 import com.emag.model.dto.produtcdto.ProductDTO;
 import com.emag.model.dto.roledto.RoleWithoutUsersDTO;
 import com.emag.model.pojo.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -23,6 +23,7 @@ public class UserWithoutPasswordDTO {
     private String name;
     private List<ProductDTO> likedProducts;
     private List<ProductDTO> productsInCart;
+    private List<AddressDTO> savedAddresses;
     private RoleWithoutUsersDTO role;
     private Date birthdate;
     private Timestamp createdAt;
@@ -49,6 +50,10 @@ public class UserWithoutPasswordDTO {
         }
         this.createdAt = user.getCreatedAt();
         this.profilePicture = user.getImage();
+        this.savedAddresses = new ArrayList<>();
+        for (Address address : user.getAddresses()) {
+            savedAddresses.add(new AddressDTO(address));
+        }
     }
 
 }

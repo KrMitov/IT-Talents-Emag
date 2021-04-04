@@ -47,11 +47,8 @@ public class Product {
     @OneToMany(mappedBy = "product")
     @JsonBackReference
     private List<UserCart> productsInCart;
-    @ManyToMany(mappedBy = "productsInOrder")
-    @JsonBackReference
-    List<Order> productIsInOrder;
-//    @OneToMany(mappedBy = "product")
-//    List<OrderedProduct> productIsInOrder;
+    @OneToMany(mappedBy = "product")
+    List<OrderedProduct> productIsInOrder;
     @OneToMany(mappedBy = "productHasCoupon")
     @JsonBackReference
     private List<Coupon> coupons;

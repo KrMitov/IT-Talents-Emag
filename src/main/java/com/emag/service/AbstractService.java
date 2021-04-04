@@ -6,6 +6,8 @@ import com.emag.model.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 
+import java.time.LocalDateTime;
+
 public abstract class AbstractService {
 
     @Autowired
@@ -79,5 +81,14 @@ public abstract class AbstractService {
             throw new BadRequestException("Product image with id " + id + " does not exist");
         }
         return productImage;
+    }
+
+    protected LocalDateTime validateDate(String date){
+        try {
+            LocalDateTime checkDate = LocalDateTime.parse(date);
+            return checkDate;
+        }catch (Exception e){
+            throw new BadRequestException("Date is not valid");
+        }
     }
 }
