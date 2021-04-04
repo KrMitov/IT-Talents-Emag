@@ -27,7 +27,8 @@ public class CouponService extends AbstractService{
         if(dto.getProductId()!=0) {
             Product product = getProductIfExists(dto.getProductId());
             coupon.setProductHasCoupon(product);
-        }else {
+        }
+        if(dto.getCategoryId() != 0) {
             Category category = getCategoryIfExists(dto.getCategoryId());
             coupon.setCategory(category);
         }

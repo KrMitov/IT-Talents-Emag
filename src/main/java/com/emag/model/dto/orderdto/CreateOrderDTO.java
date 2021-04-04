@@ -17,6 +17,7 @@ public class CreateOrderDTO {
     @NotNull(message = "You need to add user id")
     @Min(value = 1,message = "You need to add a valid user id")
     private int userId;
-    @Valid
-    private CouponDTO coupon;
+    @NotNull(message = "Coupon id must be between 0 and 100")
+    @Min(value = 0,message = "Enter a valid coupon")
+    private int couponId;
 }

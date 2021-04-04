@@ -100,12 +100,13 @@ public class UserUtility {
     }
 
     public static void validateName(String name) {
+        String specialCharacters = "#?!@$%^&*-:'{}+_()<>|[]";
         if (name.length() < 3) {
             throw new BadRequestException("Enter correct name");
         }
         for (int i = 0; i < name.length(); i++) {
             char character = name.charAt(i);
-            if (Character.isDigit(character)) {
+            if (Character.isDigit(character) || specialCharacters.contains(String.valueOf(character))) {
                 throw new BadRequestException("Enter correct name");
             }
         }
@@ -131,12 +132,13 @@ public class UserUtility {
                 }
             }
         }else{
-            if(validateBy.equals("symbols"))
+            if(validateBy.equals("symbols")) {
                 for (int i = 0; i < address.length(); i++) {
                     if (specialCharacters.contains(String.valueOf(address.charAt(i)))) {
                         throw new BadRequestException(message);
                     }
                 }
+            }
         }
     }
 
