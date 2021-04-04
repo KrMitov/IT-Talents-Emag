@@ -4,6 +4,9 @@ import com.emag.exceptions.AuthenticationException;
 import com.emag.exceptions.BadRequestException;
 import com.emag.exceptions.NotFoundException;
 import com.emag.model.dao.UserCartDAO;
+import com.emag.model.dto.produtcdto.ProductDTO;
+import com.emag.model.dto.produtcdto.ProductsFromCartForUserDTO;
+import com.emag.model.dto.userdto.UserCartDTO;
 import com.emag.model.pojo.Product;
 import com.emag.model.pojo.User;
 import com.emag.model.pojo.UserCart;
@@ -14,6 +17,8 @@ import com.emag.model.repository.ProductRepository;
 import com.emag.model.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 
@@ -31,16 +36,18 @@ public class CartService extends AbstractService{
     private static final int PRODUCT_MIN_QUANTITY = 1;
     private static final int PRODUCT_MAX_QUANTITY = 50;
 
-    public String addProductToCart(int productId, int userId){
+    @Transactional
+    public UserCartDTO addProductToCart(int productId, int userId){
         UserCartsKey primaryKey = new UserCartsKey();
         primaryKey.setUserId(userId);
         primaryKey.setProductId(productId);
         Optional<User> userFromDb = userRepository.findById(userId);
         Product product = getProductIfExists(productId);
         User user = userFromDb.get();
-       if(cartContainsProduct(user,product)){
+        if(cartContainsProduct(user,product)){
            UserCart userCart = this.increaseQuantityOfProduct(user,product);
            cartRepository.save(userCart);
+           return new UserCartDTO(userCart);
        }else {
            int quantity = 1;
            UserCart userCart = new UserCart();
@@ -49,22 +56,26 @@ public class CartService extends AbstractService{
            userCart.setProduct(product);
            userCart.setQuantity(quantity);
            cartRepository.save(userCart);
-       }
-       return "Product added to cart successfully";
+           return new UserCartDTO(userCart);
+        }
     }
 
-    public String removeProductFromCart(int productId,int userId){
+    public UserCartDTO removeProductFromCart(int productId,int userId){
         User user = userRepository.findById(userId).get();
         Product product = productRepository.findById(productId).get();
-        if (cartContainsProduct(user, product)) {
+        if (cartContainsProduct(user, product)){
             userCartDAO.removeProductFromCart(productId, userId);
+            int quantity = this.getQuantityOfProduct(user,product);
+            UserCartDTO dto = new UserCartDTO();
+            dto.setProduct(new ProductDTO(product));
+            dto.setQuantity(quantity);
+            return dto;
         } else {
             throw new NotFoundException("The product was not found in user's cart");
         }
-        return "Product removed from cart successfully";
     }
 
-    public String changeQuantityOfProduct(int productId,int userId,int quantity){
+    public UserCartDTO changeQuantityOfProduct(int productId,int userId,int quantity){
         if (quantity < PRODUCT_MIN_QUANTITY || quantity > PRODUCT_MAX_QUANTITY){
             throw new BadRequestException("Wrong quantity for product");
         }
@@ -77,10 +88,21 @@ public class CartService extends AbstractService{
         if(cartContainsProduct(user,product)) {
             UserCart userCart = this.updateQuantityOfProduct(user, product,quantity);
             cartRepository.save(userCart);
+            return new UserCartDTO(userCart);
         }else{
             throw new NotFoundException("The product was not found in user's cart");
         }
-        return "Product quantity changed successfully";
+    }
+
+    private int getQuantityOfProduct(User user,Product product){
+        int quantity = 0;
+        for (UserCart userCart : user.getProductsInCart()) {
+            if(userCart.getProduct().getFullName().equals(product.getFullName())){
+                quantity = userCart.getQuantity();
+                break;
+            }
+        }
+        return quantity;
     }
 
     private boolean cartContainsProduct(User user,Product product){

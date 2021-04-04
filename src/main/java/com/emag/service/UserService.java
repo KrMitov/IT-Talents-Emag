@@ -43,14 +43,14 @@ public class UserService extends AbstractService {
     UserDAO userDAO;
 
     public RegisterResponseUserDTO register(RegisterRequestUserDTO dto) {
-        String email = dto.getEmail();
+        String email = dto.getEmail().trim();
         if (userRepository.findByEmail(email) != null) {
             throw new BadRequestException("Email already exists!");
         }
         if (!UserUtility.emailIsValid(email)) {
             throw new BadRequestException("Incorrect email");
         }
-        String password = dto.getPassword();
+        String password = dto.getPassword().trim();
         if (!UserUtility.passwordIsValid(password)) {
             throw new BadRequestException("Password is too weak!");
         }
@@ -97,7 +97,7 @@ public class UserService extends AbstractService {
                     if(!UserUtility.passwordIsValid(dto.getNewPassword())){
                         throw new BadRequestException("Enter correct new password");
                     }
-                    user.setPassword(encoder.encode(dto.getNewPassword()));
+                    user.setPassword(encoder.encode(dto.getNewPassword().trim()));
                     user = userRepository.save(user);
                 } else {
                     throw new BadRequestException("New passwords do not match!");
@@ -109,7 +109,7 @@ public class UserService extends AbstractService {
         if (dto.getPhoneNumber() != null && dto.getPhoneNumber().length()>0){
             String phoneNumber = dto.getPhoneNumber();
             UserUtility.validatePhoneNumber(phoneNumber);
-            user.setPhoneNumber(phoneNumber);
+            user.setPhoneNumber(phoneNumber.trim());
             user = userRepository.save(user);
         }
 
@@ -189,64 +189,46 @@ public class UserService extends AbstractService {
     }
 
     private Address validateAddress(AddressDTO addressDTO) {
-        if (addressDTO.getCountry() != null && addressDTO.getCountry().length() > 0) {
-            checkForDigitsAndSymbols(addressDTO.getCountry(), "You entered a wrong country","digits and symbols");
+        if (addressDTO.getCountry() != null && addressDTO.getCountry().trim().length() > 0) {
+            UserUtility.checkForDigitsAndSymbols(addressDTO.getCountry(), "You entered a wrong country","digits and symbols");
         }
-        if (addressDTO.getProvince() != null && addressDTO.getProvince().length() > 0) {
-            checkForDigitsAndSymbols(addressDTO.getProvince(), "You entered a wrong province","digits and symbols");
+        if (addressDTO.getProvince() != null && addressDTO.getProvince().trim().length() > 0) {
+            UserUtility.checkForDigitsAndSymbols(addressDTO.getProvince(), "You entered a wrong province","digits and symbols");
         }
-        if (addressDTO.getCity() != null && addressDTO.getCity().length() > 0) {
-            checkForDigitsAndSymbols(addressDTO.getCity(), "You entered a wrong city","digits and symbols");
+        if (addressDTO.getCity() != null && addressDTO.getCity().trim().length() > 0) {
+            UserUtility.checkForDigitsAndSymbols(addressDTO.getCity(), "You entered a wrong city","digits and symbols");
         }
-        if(addressDTO.getNeighborhood() !=null && addressDTO.getNeighborhood().length() > 0){
-            checkForDigitsAndSymbols(addressDTO.getNeighborhood(),"You entered a wrong neighborhood","symbols");
+        if(addressDTO.getNeighborhood() !=null && addressDTO.getNeighborhood().trim().length() > 0){
+            UserUtility. checkForDigitsAndSymbols(addressDTO.getNeighborhood(),"You entered a wrong neighborhood","symbols");
         }
-        if (addressDTO.getStreet() !=null && addressDTO.getStreet().length() > 0) {
+        if (addressDTO.getStreet() !=null && addressDTO.getStreet().trim().length() > 0) {
             if (addressDTO.getProvince() == null || addressDTO.getCity() == null) {
                 throw new BadRequestException("You have to enter province and city values");
             } else {
-                if (addressDTO.getProvince().length() < 4 || addressDTO.getCity().length() < 3) {
+                if (addressDTO.getProvince().length() < 4 || addressDTO.getCity().trim().length() < 3) {
                     throw new BadRequestException("You have to enter correct province and city values");
                 }
             }
-            if (addressDTO.getStreet().length() < 5) {
+            if (addressDTO.getStreet().trim().length() < 5) {
                 throw new BadRequestException("Enter correct street name");
             }
-            checkForDigitsAndSymbols(addressDTO.getStreet(), "You entered wrong street", "digits and symbols");
+            UserUtility.checkForDigitsAndSymbols(addressDTO.getStreet(), "You entered wrong street", "digits and symbols");
         }
         if(addressDTO.getStreetNumber() != null){
             if(addressDTO.getProvince() == null && addressDTO.getCity() == null && addressDTO.getStreet() == null){
                 throw new BadRequestException("Enter province , city and street");
             }else {
-                if (addressDTO.getProvince().length() < 4 || addressDTO.getCity().length() < 3 || addressDTO.getStreet().length() < 5) {
+                if(addressDTO.getProvince().trim().length() < 4 || addressDTO.getCity().trim().length() < 3 || addressDTO.getStreet().trim().length() < 5){
                     throw new BadRequestException("Enter valid province,city and street");
                 }
             }
-            for (int i = 0; i < addressDTO.getStreetNumber().length(); i++) {
+            for (int i = 0; i < addressDTO.getStreetNumber().trim().length(); i++) {
                 if (!Character.isDigit(addressDTO.getStreetNumber().charAt(i))) {
                     throw new BadRequestException("You entered wrong street number");
                 }
             }
         }
         return new Address(addressDTO);
-    }
-
-    private void checkForDigitsAndSymbols(String address, String message,String validateBy) {
-        String specialCharacters = "#?!@$%^&*-:'{}+_()<>|[]";
-        if(validateBy.equals("digits and symbols")) {
-            for (int i = 0; i < address.length(); i++) {
-                if (Character.isDigit(address.charAt(i)) || specialCharacters.contains(String.valueOf(address.charAt(i)))) {
-                    throw new BadRequestException(message);
-                }
-            }
-        }else{
-            if(validateBy.equals("symbols"))
-            for (int i = 0; i < address.length(); i++) {
-                if (specialCharacters.contains(String.valueOf(address.charAt(i)))) {
-                    throw new BadRequestException(message);
-                }
-            }
-        }
     }
 
     @Scheduled(cron = "0 * * * * *")

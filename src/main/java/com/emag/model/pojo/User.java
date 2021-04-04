@@ -73,9 +73,9 @@ import java.util.List;
        private List<Order> orders;
 
            public User(RegisterRequestUserDTO registerRequestUserDTO){
-            this.email = registerRequestUserDTO.getEmail();
-            this.password = registerRequestUserDTO.getPassword();
-            this.name = registerRequestUserDTO.getName();
+            this.email = registerRequestUserDTO.getEmail().trim();
+            this.password = registerRequestUserDTO.getPassword().trim();
+            this.name = registerRequestUserDTO.getName().trim();
             this.createdAt = Timestamp.valueOf(LocalDateTime.now());
         }
 }

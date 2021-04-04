@@ -7,6 +7,12 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
-public class ProductsFromRequestDTO {
-    private int[] products;
+public class OrderConfirmationDTO{
+
+    private String message;
+
+    public OrderConfirmationDTO(String message){
+        this.message = message;
+    }
+
 }

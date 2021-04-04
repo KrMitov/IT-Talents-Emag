@@ -1,6 +1,7 @@
 package com.emag.controller;
 
 import com.emag.model.dto.orderdto.CreateOrderDTO;
+import com.emag.model.dto.orderdto.OrderConfirmationDTO;
 import com.emag.service.OrderService;
 import com.emag.service.ProductService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,7 @@ public class OrderController extends AbstractController{
     SessionManager sessionManager;
 
     @PostMapping("/orders")
-    public String createOrder(@RequestBody @Valid CreateOrderDTO dto, HttpSession session){
+    public OrderConfirmationDTO createOrder(@RequestBody @Valid CreateOrderDTO dto, HttpSession session){
         sessionManager.userVerification(session,dto.getUserId());
         return orderService.createOrder(dto);
     }

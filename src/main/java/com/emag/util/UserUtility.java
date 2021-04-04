@@ -5,6 +5,8 @@ import com.emag.exceptions.NotFoundException;
 import com.emag.model.dto.addressdto.AddressDTO;
 import com.emag.model.dto.registerdto.RegisterRequestUserDTO;
 import com.emag.model.pojo.Address;
+import com.emag.model.pojo.Coupon;
+import com.emag.model.pojo.Product;
 import com.emag.model.pojo.User;
 
 import java.time.LocalDate;
@@ -44,7 +46,7 @@ public class UserUtility {
             }
             for (int i = startCharacter + 1; i < email.length(); i++) {
                 char character = email.charAt(i);
-                if (!specialCharacters.contains(String.valueOf(character)) && !Character.isDigit(character)) {
+                if (!specialCharacters.contains(String.valueOf(character)) && !Character.isDigit(character) && !Character.isSpaceChar(character)){
                     result = true;
                 } else {
                     result = false;
@@ -56,8 +58,8 @@ public class UserUtility {
     }
 
     public static boolean passwordsMatch(RegisterRequestUserDTO dto) {
-        String password = dto.getPassword();
-        String confirmPassword = dto.getConfirmPassword();
+        String password = dto.getPassword().trim();
+        String confirmPassword = dto.getConfirmPassword().trim();
         if (password == null || confirmPassword == null) {
             throw new BadRequestException("You have to enter a vaild password");
         }
@@ -75,7 +77,7 @@ public class UserUtility {
         boolean result = false;
         //At least one upper case, one lower case,one digit,one special character minimum eight characters
         String regex = "^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9])(?=.*?[#?!@$%^&*-]).{8,}$";
-        if (password.matches(regex)) {
+        if (password.matches(regex) && !password.contains(" ")) {
             result = true;
         }
         return result;
@@ -127,4 +129,23 @@ public class UserUtility {
             }
         }
     }
+
+    public static void checkForDigitsAndSymbols(String address, String message,String validateBy) {
+        String specialCharacters = "#?!@$%^&*-:'{}+_()<>|[]";
+        if(validateBy.equals("digits and symbols")) {
+            for (int i = 0; i < address.length(); i++) {
+                if (Character.isDigit(address.charAt(i)) || specialCharacters.contains(String.valueOf(address.charAt(i)))) {
+                    throw new BadRequestException(message);
+                }
+            }
+        }else{
+            if(validateBy.equals("symbols"))
+                for (int i = 0; i < address.length(); i++) {
+                    if (specialCharacters.contains(String.valueOf(address.charAt(i)))) {
+                        throw new BadRequestException(message);
+                    }
+                }
+        }
+    }
+
 }

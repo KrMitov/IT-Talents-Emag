@@ -1,6 +1,7 @@
 package com.emag.service;
 
 import com.emag.exceptions.BadRequestException;
+import com.emag.model.dto.coupondto.CouponConfirmationDTO;
 import com.emag.model.dto.coupondto.CouponDTO;
 import com.emag.model.pojo.Category;
 import com.emag.model.pojo.Coupon;
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 @Service
 public class CouponService extends AbstractService{
 
-    public String createCoupon(CouponDTO dto){
+    public CouponConfirmationDTO createCoupon(CouponDTO dto){
         this.validateCoupon(dto);
         Coupon coupon = new Coupon(dto);
         if(dto.getStartDate()!=null && dto.getStartDate().length()>0){
@@ -33,7 +34,7 @@ public class CouponService extends AbstractService{
             coupon.setCategory(category);
         }
         couponRepository.save(coupon);
-        return "Coupon created successfully";
+        return new CouponConfirmationDTO("Coupon created successfully");
     }
 
     private void validateCoupon(CouponDTO dto){

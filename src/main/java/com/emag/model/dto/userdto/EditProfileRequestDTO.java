@@ -4,6 +4,8 @@ import com.emag.model.dto.addressdto.AddressDTO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
+import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
 
 @Getter
@@ -20,6 +22,7 @@ public class EditProfileRequestDTO {
     private String phoneNumber;
     @NotNull
     private String birthDate;
+    @Valid
     private AddressDTO address;
 
 }

@@ -5,10 +5,7 @@ import com.emag.model.dto.produtcdto.ProductsFromCartForUserDTO;
 import com.emag.model.dto.produtcdto.UserOrdersDTO;
 import com.emag.model.dto.registerdto.RegisterRequestUserDTO;
 import com.emag.model.dto.registerdto.RegisterResponseUserDTO;
-import com.emag.model.dto.userdto.EditProfileRequestDTO;
-import com.emag.model.dto.userdto.LoginRequestUserDTO;
-import com.emag.model.dto.userdto.UserReviewsDTO;
-import com.emag.model.dto.userdto.UserWithoutPasswordDTO;
+import com.emag.model.dto.userdto.*;
 import com.emag.model.pojo.UserImage;
 import com.emag.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,10 +44,10 @@ public class UserController extends AbstractController{
     }
 
     @PostMapping("/users/logout")
-    public String logout(HttpSession session){
+    public LogoutDTO logout(HttpSession session){
         sessionManager.getLoggedUser(session);
         sessionManager.logoutUser(session);
-        return "You have successfully logged out.";
+        return new LogoutDTO("You have successfully logged out.");
     }
 
     @PutMapping("/users/{id}")

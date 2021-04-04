@@ -23,6 +23,4 @@ public class Role {
     @OneToMany(mappedBy = "role")
     @JsonManagedReference
     private List<User> users;
-
-
 }

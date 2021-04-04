@@ -1,5 +1,6 @@
 package com.emag.controller;
 
+import com.emag.model.dto.coupondto.CouponConfirmationDTO;
 import com.emag.model.dto.coupondto.CouponDTO;
 import com.emag.service.CouponService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,7 +20,7 @@ public class CouponController extends AbstractController{
     SessionManager sessionManager;
 
     @PostMapping("/coupons")
-    public String addCoupon(@RequestBody @Valid CouponDTO dto, HttpSession session){
+    public CouponConfirmationDTO addCoupon(@RequestBody @Valid CouponDTO dto, HttpSession session){
         sessionManager.adminVerification(session);
         return couponService.createCoupon(dto);
     }
