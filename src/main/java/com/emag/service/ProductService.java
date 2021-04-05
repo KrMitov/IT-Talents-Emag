@@ -54,7 +54,7 @@ public class ProductService extends AbstractService{
         boolean priceEmailAlert = false;
         Double newRegularPrice = requestProductDTO.getRegularPrice();
         if (newRegularPrice != null && newRegularPrice > 0){
-            if (newRegularPrice <= product.getDiscountedPrice()){
+            if (product.getDiscountedPrice() != null && newRegularPrice <= product.getDiscountedPrice()){
                 priceExceptionFlag = true;
             }
             if (newRegularPrice < product.getRegularPrice()) {

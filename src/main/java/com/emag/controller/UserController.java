@@ -31,7 +31,6 @@ public class UserController extends AbstractController{
 
     @PostMapping("/users/login")
     public UserWithoutPasswordDTO login(@RequestBody @Valid LoginRequestUserDTO dto, HttpSession session){
-        sessionManager.loggedInVerification(session);
         UserWithoutPasswordDTO response = userService.login(dto);
         sessionManager.loginUser(session,response.getId());
         return response;
@@ -45,7 +44,6 @@ public class UserController extends AbstractController{
 
     @PostMapping("/users/logout")
     public LogoutDTO logout(HttpSession session){
-        sessionManager.getLoggedUser(session);
         sessionManager.logoutUser(session);
         return new LogoutDTO("You have successfully logged out.");
     }

@@ -18,7 +18,7 @@ public class ReviewController extends AbstractController{
     private ReviewService reviewService;
 
     @PostMapping("/reviews")
-    public ReviewDTO addReview(@RequestBody RequestReviewDTO requestReviewDTO, HttpSession session){
+    public ReviewDTO addReview(@Valid @RequestBody RequestReviewDTO requestReviewDTO, HttpSession session){
         return reviewService.addReview(requestReviewDTO, sessionManager.getLoggedUser(session).getId());
     }
 

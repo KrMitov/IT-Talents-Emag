@@ -25,7 +25,6 @@ public class EmailService{
         message.setSubject(EMAIL_SUBJECT);
         message.setText(createMailText(product));
         emailSender.send(message);
-        System.out.println("Message sent successfully");
     }
 
     private String[] getRecipients(Product product){
