@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import javax.validation.Valid;
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 @Getter
 @Setter
@@ -19,6 +20,7 @@ public class EditProfileRequestDTO {
     @NotNull(message = "Password can not be null")
     private String confirmNewPassword;
     @NotNull(message = "Phone number can not be null")
+    @Size(min = 10,max = 10, message="Enter a correct phone number ")
     private String phoneNumber;
     @NotNull(message = "Birthday can not be null")
     private String birthDate;

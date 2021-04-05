@@ -109,14 +109,12 @@ public class UserService extends AbstractService {
             user.setPhoneNumber(phoneNumber.trim());
             user = userRepository.save(user);
         }
-
         if (dto.getBirthDate() != null && dto.getBirthDate().length()>0){
             LocalDate birthDate = UserUtility.validateBirthDate(dto.getBirthDate());
             Date sqlDate = Date.valueOf(birthDate);
             user.setBirthDate(sqlDate);
             user = userRepository.save(user);
         }
-
         if (dto.getAddress() != null) {
             if(!UserUtility.addressIsEmpty(dto.getAddress())) {
                 Address address = validateAddress(dto.getAddress());
