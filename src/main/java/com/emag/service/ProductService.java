@@ -65,8 +65,12 @@ public class ProductService extends AbstractService{
         Double newDiscountedPrice = requestProductDTO.getDiscountedPrice();
         if (newDiscountedPrice != null && newDiscountedPrice > 0){
             priceExceptionFlag = newDiscountedPrice >= product.getRegularPrice();
-            priceEmailAlert = newDiscountedPrice < product.getDiscountedPrice();
+            Double oldDiscountedPrice = product.getDiscountedPrice();
+            priceEmailAlert = oldDiscountedPrice == null || newDiscountedPrice < oldDiscountedPrice;
             product.setDiscountedPrice(newDiscountedPrice);
+        }
+        else {
+            product.setDiscountedPrice(null);
         }
         if (priceExceptionFlag) {
             throw new BadRequestException("Discounted price should be lower than regular price");
