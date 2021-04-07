@@ -17,12 +17,13 @@ public class CouponService extends AbstractService{
     public CouponConfirmationDTO createCoupon(CouponDTO dto){
         this.validateCoupon(dto);
         Coupon coupon = new Coupon(dto);
-        if(dto.getStartDate()!=null && dto.getStartDate().length()>0){
+        if(dto.getStartDate() != null && dto.getStartDate().length() > 0){
             LocalDateTime startDate = validateDate(dto.getStartDate());
             coupon.setStartDate(Timestamp.valueOf(startDate));
-        }else{
-            LocalDateTime expireDate = validateDate(dto.getExpireDate());
-            coupon.setExpireDate(Timestamp.valueOf(expireDate));
+            if(dto.getExpireDate() != null && dto.getExpireDate().length() > 0){
+                LocalDateTime expireDate = validateDate(dto.getExpireDate());
+                coupon.setExpireDate(Timestamp.valueOf(expireDate));
+            }
         }
         if(dto.getProductId()!=0) {
             Product product = getProductIfExists(dto.getProductId());
